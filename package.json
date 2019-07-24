@@ -1,0 +1,15 @@
+{
+  "name": "gadmin-server",
+  "version": "1.0.0",
+  "description": "server for the gadmin app",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "Brandon Lugo",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
