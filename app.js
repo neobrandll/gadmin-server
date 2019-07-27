@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const { port } = require('./config.js');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -16,6 +17,8 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
+
+app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
