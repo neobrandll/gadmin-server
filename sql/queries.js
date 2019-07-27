@@ -18,6 +18,13 @@ module.exports = {
     insertUsuario: new PS(
       'insertUsuario',
       'INSERT INTO usuario (id_persona, us_usuario, pw_usuario) VALUES ($1,$2,$3) RETURNING id_usuario'
-    )
+    ),
+    findUserWithEmail: new PS(
+      'findUserWithEmail',
+      'SELECT id_usuario, us_usuario, pw_usuario, em_persona ' +
+        'FROM usuario INNER JOIN persona USING (id_persona) ' +
+        'WHERE em_persona = $1'
+    ),
+    getProfiles: new PS('getProfiles', 'SELECT * FROM perfil_usuario WHERE id_usuario = $1')
   }
 };

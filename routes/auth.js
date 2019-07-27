@@ -12,7 +12,8 @@ router.post(
     body('email')
       .isEmail()
       .withMessage('Porfavor ingrese un correo valido..')
-      .custom(customValidators.email),
+      .custom(customValidators.email)
+      .normalizeEmail(),
     body('password')
       .trim()
       .isLength({ min: 5 })
@@ -29,8 +30,16 @@ router.post(
       .trim()
       .custom(customValidators.user)
   ],
-  authController.signup
+  authController.registro
 );
-router.post('login', authController.login);
+router.post(
+  '/login',
+  [
+    body('password', 'Introduzca una contraseña correcta.')
+      .trim()
+      .isLength({ min: 5 })
+  ],
+  authController.login
+);
 
 module.exports = router;
