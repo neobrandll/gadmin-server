@@ -22,6 +22,7 @@ module.exports = (req, res, next) => {
     e.statusCode = 401;
     throw e;
   }
-  req.userId = decodedToken.userId;
+  req.id_usuario = decodedToken.id_usuario;
+  req.profile = decodedToken.profile;
   next();
 };

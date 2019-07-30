@@ -31,3 +31,34 @@ exports.confirmPassword = (value, { req }) => {
   }
   return true;
 };
+
+exports.updateEmail = async (value, { req }) => {
+  const id_usuario = req.id_usuario;
+  if (value !== req.profile.em_persona && value) {
+    const emailFound = await db.oneOrNone(queries.auth.emailExist, [value]);
+    if (emailFound) {
+      throw new Error('El correo ingresado ya esta en uso.');
+    }
+  }
+  return true;
+};
+
+exports.updateUser = async (user, { req }) => {
+  if (user !== req.profile.us_usuario && user) {
+    const usuarioFound = await db.oneOrNone(queries.auth.findUser, [user]);
+    if (usuarioFound) {
+      throw new Error('El usuario ingresado ya esta en uso.');
+    }
+  }
+  return true;
+};
+
+exports.updateCi = async (ci, { req }) => {
+  if (ci !== req.profile.ci_persona && ci) {
+    const ciFound = await db.oneOrNone(queries.auth.findCi, [ci]);
+    if (ciFound) {
+      throw new Error('La cedula ingresada ya esta en uso.');
+    }
+  }
+  return true;
+};
