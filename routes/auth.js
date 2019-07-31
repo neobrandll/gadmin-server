@@ -118,13 +118,6 @@ router.put(
   '/updateProfile',
   isAuth,
   [
-    body('email', 'Por favor ingrese un correo valido.')
-      .trim()
-      .isEmail()
-      .normalizeEmail()
-      .not()
-      .isEmpty()
-      .custom(customValidators.updateEmail),
     body('nombre')
       .trim()
       .not()
@@ -156,8 +149,60 @@ router.put(
   authController.updateProfile
 );
 
-router.put('/updateEmail', isAuth);
+router.put(
+  '/updateEmail',
+  isAuth,
+  [
+    body('email', 'Por favor ingrese un correo valido.')
+      .trim()
+      .isEmail()
+      .normalizeEmail()
+      .not()
+      .isEmpty()
+      .custom(customValidators.updateEmail),
+    body('password')
+      .trim()
+      .isLength({ min: 5 })
+      .withMessage('La contraseña no cumple con el minimo de caracteres (5)')
+      .isAlphanumeric()
+      .withMessage('La contraseña tiene que ser alfanumerica')
+  ],
+  authController.updateEmail
+);
 
-router.put('/updatePassword', isAuth);
+router.post(
+  '/sendTokenPassword',
+  [
+    body('email', 'Por favor ingrese un correo valido.')
+      .trim()
+      .isEmail()
+      .normalizeEmail()
+      .not()
+      .isEmpty()
+  ],
+  authController.sendTokenPassword
+);
+
+router.post(
+  '/updatePassword',
+  [
+    body('email', 'Por favor ingrese un correo valido.')
+      .trim()
+      .isEmail()
+      .normalizeEmail()
+      .not()
+      .isEmpty(),
+    body('password')
+      .trim()
+      .isLength({ min: 5 })
+      .withMessage('La contraseña no cumple con el minimo de caracteres (5)')
+      .isAlphanumeric()
+      .withMessage('La contraseña tiene que ser alfanumerica'),
+    body('confirmPassword')
+      .trim()
+      .custom(customValidators.confirmPassword)
+  ],
+  authController.updatePassword
+);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const config = {
-  secret: 'ajapapiaquivaunavariabledeentornonoseaiszorritoylodejeisasipalpublico',
-  port: 8080
+  secret: process.env.SECRET,
+  port: process.env.PORT
 };
 
 module.exports = config;
