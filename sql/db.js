@@ -1,4 +1,4 @@
 const pgp = require('pg-promise')();
-const db = pgp('postgres://postgres:masterkey@localhost:5432/gadmin');
+const db = pgp(process.env.URL_DB);
 
 module.exports = db;
