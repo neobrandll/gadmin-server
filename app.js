@@ -10,6 +10,7 @@ if (result.error) {
 
 const { port } = require('./config.js');
 const authRoutes = require('./routes/auth');
+const empresaRoutes = require('./routes/empresa.js');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/empresa', empresaRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
@@ -33,4 +35,6 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message, data });
 });
 
-app.listen(port);
+app.listen(port, () => {
+  console.log('server started!');
+});

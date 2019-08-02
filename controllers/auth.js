@@ -28,27 +28,31 @@ exports.registro = async (req, res, next) => {
     await validationHandler(req);
     const hashedPassword = await bcrypt.hash(password, 12);
     db.task(async con => {
-      const direccion = await con.one(authQueries.insertDireccion, [pais, estado, ciudad, calle]);
-      const persona = await con.one(authQueries.insertPersona, [
-        direccion.id_direccion,
-        nombre,
-        apellido,
-        email,
-        telf,
-        ci
-      ]);
-      const id_usuario = await con.one(authQueries.insertUsuario, [
-        persona.id_persona,
-        user,
-        hashedPassword
-      ]);
-      sendEmail(
-        email,
-        'Bienvenido a Gadmin',
-        `Bienvenido a Gadmin ${nombre} ${apellido}, tu usuario es ${user}`,
-        next
-      );
-      res.status(201).json({ msg: 'usuario creado!', id_usuario });
+      try {
+        const direccion = await con.one(authQueries.insertDireccion, [pais, estado, ciudad, calle]);
+        const persona = await con.one(authQueries.insertPersona, [
+          direccion.id_direccion,
+          nombre,
+          apellido,
+          email,
+          telf,
+          ci
+        ]);
+        const id_usuario = await con.one(authQueries.insertUsuario, [
+          persona.id_persona,
+          user,
+          hashedPassword
+        ]);
+        sendEmail(
+          email,
+          'Bienvenido a Gadmin',
+          `Bienvenido a Gadmin ${nombre} ${apellido}, tu usuario es ${user}`,
+          next
+        );
+        res.status(201).json({ msg: 'usuario creado!', id_usuario });
+      } catch (err) {
+        errorHandler(err, next);
+      }
     });
   } catch (err) {
     errorHandler(err, next);

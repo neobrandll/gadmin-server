@@ -1,8 +1,8 @@
 const express = require('express');
 const { body } = require('express-validator');
 
-const authController = require('../controllers/auth');
-const customValidators = require('./custom_validators/vadilators');
+const authControllers = require('../controllers/auth');
+const authValidators = require('./custom_validators/auth');
 const isAuth = require('../middlewares/is-auth');
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.post(
       .isEmpty()
       .isEmail()
       .normalizeEmail()
-      .custom(customValidators.email),
+      .custom(authValidators.email),
     body('password')
       .trim()
       .isLength({ min: 5 })
@@ -25,19 +25,21 @@ router.post(
       .withMessage('La contraseña tiene que ser alfanumerica'),
     body('confirmPassword')
       .trim()
-      .custom(customValidators.confirmPassword),
+      .custom(authValidators.confirmPassword),
     body('ci')
       .trim()
       .not()
       .isEmpty()
       .withMessage('Debe de ingresar una cedula')
-      .custom(customValidators.ci),
+      .isInt()
+      .withMessage('El rif debe de ser un numero entero')
+      .custom(authValidators.ci),
     body('user')
       .trim()
       .not()
       .isEmpty()
       .withMessage('Debe de ingresar un usuario')
-      .custom(customValidators.user),
+      .custom(authValidators.user),
     body('nombre')
       .trim()
       .not()
@@ -74,7 +76,7 @@ router.post(
       .isEmpty()
       .withMessage('Por favor ingrese una calle')
   ],
-  authController.registro
+  authControllers.registro
 );
 router.post(
   '/login',
@@ -83,7 +85,7 @@ router.post(
       .trim()
       .isLength({ min: 5 })
   ],
-  authController.login
+  authControllers.login
 );
 
 router.put(
@@ -111,7 +113,7 @@ router.put(
       .isEmpty()
       .withMessage('Por favor ingrese una calle')
   ],
-  authController.updateAddress
+  authControllers.updateAddress
 );
 
 router.put(
@@ -128,13 +130,15 @@ router.put(
       .not()
       .isEmpty()
       .withMessage('Debe de ingresar un usuario')
-      .custom(customValidators.updateUser),
+      .custom(authValidators.updateUser),
     body('ci')
       .trim()
       .not()
       .isEmpty()
       .withMessage('Debe de ingresar una cedula')
-      .custom(customValidators.updateCi),
+      .isInt()
+      .withMessage('El rif debe de ser un numero entero')
+      .custom(authValidators.updateCi),
     body('apellido')
       .trim()
       .not()
@@ -146,7 +150,7 @@ router.put(
       .isEmpty()
       .withMessage('El numero de telefono no puede estar vacio')
   ],
-  authController.updateProfile
+  authControllers.updateProfile
 );
 
 router.put(
@@ -159,7 +163,7 @@ router.put(
       .normalizeEmail()
       .not()
       .isEmpty()
-      .custom(customValidators.updateEmail),
+      .custom(authValidators.updateEmail),
     body('password')
       .trim()
       .isLength({ min: 5 })
@@ -167,7 +171,7 @@ router.put(
       .isAlphanumeric()
       .withMessage('La contraseña tiene que ser alfanumerica')
   ],
-  authController.updateEmail
+  authControllers.updateEmail
 );
 
 router.post(
@@ -180,10 +184,10 @@ router.post(
       .not()
       .isEmpty()
   ],
-  authController.sendTokenPassword
+  authControllers.sendTokenPassword
 );
 
-router.post(
+router.put(
   '/updatePassword',
   [
     body('email', 'Por favor ingrese un correo valido.')
@@ -200,9 +204,9 @@ router.post(
       .withMessage('La contraseña tiene que ser alfanumerica'),
     body('confirmPassword')
       .trim()
-      .custom(customValidators.confirmPassword)
+      .custom(authValidators.confirmPassword)
   ],
-  authController.updatePassword
+  authControllers.updatePassword
 );
 
 module.exports = router;
