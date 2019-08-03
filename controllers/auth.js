@@ -284,9 +284,12 @@ exports.updatePassword = async (req, res, next) => {
   }
 };
 
-exports.plantilla = async (req, res, next) => {
+exports.getUserData = async (req, res, next) => {
   try {
     validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const userData = await db.one(authQueries.getUserData, [id_usuario]);
+    res.status(200).json({ userData });
   } catch (err) {
     errorHandler(err, next);
   }

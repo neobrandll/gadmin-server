@@ -85,7 +85,7 @@ router.put(
       .not()
       .isEmpty()
       .withMessage('Por favor ingrese una calle'),
-    body('empresaId')
+    body('idEmpresa')
       .trim()
       .not()
       .isEmpty()

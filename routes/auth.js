@@ -209,4 +209,6 @@ router.put(
   authControllers.updatePassword
 );
 
+router.get('/getUser', isAuth, authControllers.getUserData);
+
 module.exports = router;

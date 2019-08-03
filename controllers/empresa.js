@@ -42,6 +42,9 @@ exports.createEmpresa = async (req, res, next) => {
           no_empresa,
           ri_empresa
         ]);
+        const perfil = await con.one(adminQueries.createProfile, ['admin', empresa.id_empresa]);
+        await con.none(adminQueries.addPermissionToProfile, [4, perfil.id_perfil]);
+        await con.none(adminQueries.addProfileToUserWithId, [perfil.id_perfil, id_usuario]);
         res.status(201).json({ msg: 'empresa creada!', empresa });
       } catch (err) {
         errorHandler(err, next);
@@ -54,13 +57,23 @@ exports.createEmpresa = async (req, res, next) => {
 
 exports.updateAddress = async (req, res, next) => {
   try {
-    //SOLAMENTE SI TIENE PERMISOS
     validationHandler(req);
-    const id_empresa = req.body.empresaId;
+    const id_empresa = req.body.idEmpresa;
     const pais = req.body.pais;
     const estado = req.body.estado;
     const ciudad = req.body.ciudad;
     const calle = req.body.calle;
+    const id_usuario = req.id_usuario;
+    const permission = await db.oneOrNone(adminQueries.searchPermission, [
+      id_usuario,
+      1,
+      id_empresa
+    ]);
+    if (!permission) {
+      const err = new Error('No se tienen permisos para modificar la direccion de la empresa');
+      err.statusCode = 401;
+      throw err;
+    }
     const updatedAddress = await db.one(empresaQueries.updateAddress, [
       pais,
       estado,

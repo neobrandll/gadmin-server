@@ -81,7 +81,13 @@ module.exports = {
   updatePassword: new PS(
     'updatePassword',
     'UPDATE usuario SET pw_usuario = $1 WHERE id_usuario = $2'
+  ),
+  getUserData: new PS(
+    'getUserData',
+    'SELECT ' +
+      'no_persona, ap_persona, em_persona, te_persona, ci_persona, ' +
+      'us_usuario, pa_direccion, es_direccion, ci_direccion, ca_direccion ' +
+      'FROM persona INNER JOIN usuario USING(id_persona) ' +
+      'INNER JOIN direccion USING(id_direccion) WHERE id_usuario = $1'
   )
 };
-
-//find, create and update pwtoken
