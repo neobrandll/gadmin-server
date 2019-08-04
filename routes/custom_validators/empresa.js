@@ -24,3 +24,11 @@ exports.updateRif = async (newRif, { req }) => {
   }
   return true;
 };
+
+exports.empresaExist = async (id_empresa, { req }) => {
+  const foundEmpresa = await db.oneOrNone(empresaQueries.findEmpresaById, [id_empresa]);
+  if (!foundEmpresa) {
+    throw new Error('no existe una empresa con el id ingresado');
+  }
+  return true;
+};

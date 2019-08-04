@@ -43,5 +43,21 @@ module.exports = {
   addProfileToUserWithId: new PS(
     'addProfileToUserWithId',
     'INSERT INTO perfil_usuario (id_perfil, id_usuario) ' + 'VALUES ($1, $2)'
+  ),
+  updateProfile: new PS('updateProfile', 'UPDATE perfil SET de_perfil = $1 WHERE id_perfil = $2'),
+  deleteProfile: new PS(
+    'deleteProfile',
+    'DELETE FROM perfil WHERE id_perfil = $1 AND id_empresa = $2'
+  ),
+  removeProfileFromUser: new PS(
+    'removeProfileFromUser',
+    'DELETE FROM perfil_usuario ' +
+      'WHERE id_usuario = (SELECT id_usuario FROM usuario WHERE us_usuario = $1) ' +
+      'AND id_perfil = $2'
+  ),
+  getProfilesEmpresa: new PS('getProfilesEmpresa', 'SELECT * FROM perfil WHERE id_empresa = $1'),
+  removePermissionsFromProfile: new PS(
+    'removePermissionsFromProfile',
+    'DELETE FROM permiso_perfil WHERE id_perfil = $1'
   )
 };

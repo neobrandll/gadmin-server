@@ -3,9 +3,9 @@ const PS = require('pg-promise').PreparedStatement;
 module.exports = {
   getProfiles: new PS(
     'getProfiles',
-    'SELECT id_perfil, de_perfil, id_empresa ' +
+    'SELECT id_perfil, de_perfil, id_empresa, de_permiso, id_permiso ' +
       'FROM perfil_usuario INNER JOIN perfil ' +
-      'USING(id_perfil) ' +
+      'USING(id_perfil) INNER JOIN permiso_perfil USING(id_perfil) INNER JOIN permiso USING(id_permiso)' +
       'WHERE id_usuario = $1 AND id_empresa = $2'
   ),
   createEmpresa: new PS(
@@ -27,5 +27,6 @@ module.exports = {
   updateEmpresaProfile: new PS(
     'updateEmpresaProfile',
     'UPDATE empresa SET no_empresa = $1, ri_empresa = $2 WHERE id_empresa = $3 RETURNING *'
-  )
+  ),
+  findEmpresaById: new PS('findEmpresaById', 'SELECT * FROM empresa WHERE id_empresa = $1')
 };

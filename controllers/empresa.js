@@ -11,13 +11,17 @@ exports.getProfiles = async (req, res, next) => {
     validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.id_empresa;
-    const profiles = await db.manyOrNone(empresaQueries.getProfiles, [id_usuario, id_empresa]);
-    if (!profiles) {
+    const perfiles = await db.manyOrNone(empresaQueries.getProfiles, [id_usuario, id_empresa]);
+    if (!perfiles) {
       const err = new Error('El usuario no posee perfiles en la empresa seleccionada');
       err.statusCode = 401;
       throw err;
     }
-    res.status(200).json({ profiles });
+    const permisos = [];
+    for (const perfil of perfiles) {
+      permisos.push(perfil.id_permiso);
+    }
+    res.status(200).json({ perfiles, permisos });
   } catch (err) {
     errorHandler(err, next);
   }

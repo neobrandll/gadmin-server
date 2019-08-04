@@ -32,7 +32,7 @@ router.post(
       .isEmpty()
       .withMessage('Debe de ingresar una cedula')
       .isInt()
-      .withMessage('El rif debe de ser un numero entero')
+      .withMessage('La cedula debe de ser un numero entero')
       .custom(authValidators.ci),
     body('user')
       .trim()

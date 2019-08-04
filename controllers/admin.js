@@ -14,7 +14,7 @@ exports.addProfileToUser = async (req, res, next) => {
     const receiverUser = req.body.user;
     const id_profile = req.body.idProfile;
     const id_empresa = req.body.idEmpresa;
-    const permission = await db.oneOrNone(adminQueries.searchPermission, [
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
       id_usuario,
       3,
       id_empresa
@@ -43,13 +43,14 @@ exports.addProfileToUser = async (req, res, next) => {
   }
 };
 
-exports.createProfile = async (req, res, next) => {
-  const id_usuario = req.id_usuario;
-  const id_empresa = req.body.idEmpresa;
-  const de_perfil = req.body.dePerfil.toLowerCase();
+exports.removeProfileFromUser = async (req, res, next) => {
   try {
     validationHandler(req);
-    const permission = await db.oneOrNone(adminQueries.searchPermission, [
+    const id_usuario = req.id_usuario;
+    const receiverUser = req.params.user;
+    const id_perfil = req.params.idPerfil;
+    const id_empresa = req.params.idEmpresa;
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
       id_usuario,
       3,
       id_empresa
@@ -61,13 +62,119 @@ exports.createProfile = async (req, res, next) => {
       err.statusCode = 401;
       throw err;
     }
-    await db.none(adminQueries.createProfile, [de_perfil, id_empresa]);
+    const profilesUser = await db.manyOrNone(adminQueries.getPerfilUsuario, [receiverUser]);
+    const foundProfile = profilesUser.find(profile => profile.id_perfil === +id_perfil);
+    if (!foundProfile) {
+      const err = new Error('El usuario no posee el perfil ingresado!');
+      err.statusCode = 422;
+      throw err;
+    }
+    await db.none(adminQueries.removeProfileFromUser, [receiverUser, id_perfil]);
+    res.status(200).json({ msg: 'perfil removido correctamente!' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.createProfile = async (req, res, next) => {
+  const id_usuario = req.id_usuario;
+  const id_empresa = req.body.idEmpresa;
+  const de_perfil = req.body.dePerfil.toLowerCase();
+  try {
+    validationHandler(req);
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
+      id_usuario,
+      3,
+      id_empresa
+    ]);
+    if (!permission) {
+      const err = new Error(
+        'No se tienen permisos para manejar permisologia y perfiles de la empresa'
+      );
+      err.statusCode = 401;
+      throw err;
+    }
+    await db.one(adminQueries.createProfile, [de_perfil, id_empresa]);
     res.status(201).json({ msg: 'perfil creado!' });
   } catch (err) {
     errorHandler(err, next);
   }
 };
 
+exports.updateProfile = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_perfil = req.body.idPerfil;
+    const de_perfil = req.body.dePerfil.toLowerCase();
+    const id_empresa = req.body.idEmpresa;
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
+      id_usuario,
+      3,
+      id_empresa
+    ]);
+    if (!permission) {
+      const err = new Error(
+        'No se tienen permisos para manejar permisologia y perfiles de la empresa'
+      );
+      err.statusCode = 401;
+      throw err;
+    }
+    await db.none(adminQueries.updateProfile, [de_perfil, id_perfil]);
+    res.status(200).json({ msg: 'perfil actualizado!' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.deleteProfile = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_perfil = req.params.idPerfil;
+    const id_empresa = req.params.idEmpresa;
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
+      id_usuario,
+      3,
+      id_empresa
+    ]);
+    if (!permission) {
+      const err = new Error(
+        'No se tienen permisos para manejar permisologia y perfiles de la empresa'
+      );
+      err.statusCode = 401;
+      throw err;
+    }
+    await db.none(adminQueries.deleteProfile, [id_perfil, id_empresa]);
+    res.status(200).json({ msg: 'perfil eliminado!' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getProfilesEmpresa = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
+      id_usuario,
+      3,
+      id_empresa
+    ]);
+    if (!permission) {
+      const err = new Error(
+        'No se tienen permisos para manejar permisologia y perfiles de la empresa'
+      );
+      err.statusCode = 401;
+      throw err;
+    }
+    const perfiles = await db.manyOrNone(adminQueries.getProfilesEmpresa, [id_empresa]);
+    res.status(200).json({ perfiles });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
 exports.addPermissionToProfile = async (req, res, next) => {
   try {
     validationHandler(req);
@@ -75,7 +182,7 @@ exports.addPermissionToProfile = async (req, res, next) => {
     const id_profile = req.body.idPerfil;
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
-    const permission = await db.oneOrNone(adminQueries.searchPermission, [
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
       id_usuario,
       3,
       id_empresa
@@ -98,7 +205,9 @@ exports.addPermissionToProfile = async (req, res, next) => {
         err.statusCode = 422;
         throw err;
       }
-      await db.one(adminQueries.addPermissionToProfile, [id_permission, id_profile]);
+    }
+    for (const id of id_permissionsArr) {
+      await db.none(adminQueries.addPermissionToProfile, [id, id_profile]);
     }
     res.status(201).json({ msg: 'permisos agregados!' });
   } catch (err) {
@@ -106,4 +215,31 @@ exports.addPermissionToProfile = async (req, res, next) => {
   }
 };
 
-//CRUD DE TODA ESTA GENTE
+exports.updatePermissionProfile = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_permissionsArr = req.body.idPermissionsArr;
+    const id_perfil = req.body.idPerfil;
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    const permission = await db.manyOrNone(adminQueries.searchPermission, [
+      id_usuario,
+      3,
+      id_empresa
+    ]);
+    if (!permission) {
+      const err = new Error(
+        'No se tienen permisos para manejar permisologia y perfiles de la empresa'
+      );
+      err.statusCode = 401;
+      throw err;
+    }
+    await db.none(adminQueries.removePermissionsFromProfile, [id_perfil]);
+    for (const id of id_permissionsArr) {
+      await db.none(adminQueries.addPermissionToProfile, [id, id_perfil]);
+    }
+    res.status(201).json({ msg: 'permisos actualizados!' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};

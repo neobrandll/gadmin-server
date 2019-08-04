@@ -12,6 +12,7 @@ const { port } = require('./config.js');
 const authRoutes = require('./routes/auth');
 const empresaRoutes = require('./routes/empresa.js');
 const adminRoutes = require('./routes/admin');
+const employeeRoutes = require('./routes/employee');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/empresa', empresaRoutes);
 app.use('/admin', adminRoutes);
+app.use('/employee', employeeRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
