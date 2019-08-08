@@ -20,7 +20,7 @@ module.exports = {
     'insertPersona',
     'INSERT INTO ' +
       'persona (id_direccion,no_persona,ap_persona, em_persona, te_persona, ci_persona) ' +
-      'VALUES ($1,$2,$3,$4,$5, $6) RETURNING id_persona'
+      'VALUES ($1,$2,$3,$4,$5, $6) RETURNING *'
   ),
   insertUsuario: new PS(
     'insertUsuario',

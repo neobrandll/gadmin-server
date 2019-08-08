@@ -4,6 +4,7 @@ const authQueries = require('../sql/queries/auth');
 const adminQueries = require('../sql/queries/admin');
 const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
+const permissionHandler = require('../util/permissionHandler');
 const sendEmail = require('../util/email');
 
 exports.getProfiles = async (req, res, next) => {
@@ -12,7 +13,7 @@ exports.getProfiles = async (req, res, next) => {
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.id_empresa;
     const perfiles = await db.manyOrNone(empresaQueries.getProfiles, [id_usuario, id_empresa]);
-    if (!perfiles) {
+    if (!perfiles.length > 0) {
       const err = new Error('El usuario no posee perfiles en la empresa seleccionada');
       err.statusCode = 401;
       throw err;
@@ -68,16 +69,12 @@ exports.updateAddress = async (req, res, next) => {
     const ciudad = req.body.ciudad;
     const calle = req.body.calle;
     const id_usuario = req.id_usuario;
-    const permission = await db.oneOrNone(adminQueries.searchPermission, [
+    await permissionHandler(
+      id_empresa,
       id_usuario,
       1,
-      id_empresa
-    ]);
-    if (!permission) {
-      const err = new Error('No se tienen permisos para modificar la direccion de la empresa');
-      err.statusCode = 401;
-      throw err;
-    }
+      'No se tienen permisos para modificar la direccion de la empresa'
+    );
     const updatedAddress = await db.one(empresaQueries.updateAddress, [
       pais,
       estado,
@@ -109,16 +106,12 @@ exports.updateProfile = async (req, res, next) => {
     const no_empresa = req.body.nombreEmpresa;
     const id_empresa = req.body.idEmpresa;
     const id_usuario = req.id_usuario;
-    const permission = await db.oneOrNone(adminQueries.searchPermission, [
+    await permissionHandler(
+      id_empresa,
       id_usuario,
       2,
-      id_empresa
-    ]);
-    if (!permission) {
-      const err = new Error('No se tienen permisos para modificar el perfil de la empresa');
-      err.statusCode = 401;
-      throw err;
-    }
+      'No se tienen permisos para modificar el perfil de la empresa'
+    );
     const updatedProfile = await db.one(empresaQueries.updateEmpresaProfile, [
       no_empresa,
       ri_empresa,

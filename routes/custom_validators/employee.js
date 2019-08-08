@@ -15,7 +15,10 @@ exports.createUser = async (ci, { req }) => {
 };
 
 exports.deCargoExist = async (deCargo, { req }) => {
-  const id_empresa = req.body.idEmpresa;
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
   const deCargoFound = await db.oneOrNone(employeeQueries.deCargoExist, [deCargo, id_empresa]);
   if (deCargoFound) {
     throw new Error('Ya existe un cargo con la descripcion ingresada');
@@ -24,10 +27,21 @@ exports.deCargoExist = async (deCargo, { req }) => {
 };
 
 exports.cargoExist = async (idCargo, { req }) => {
-  const id_empresa = req.body.idEmpresa;
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
   const cargoFound = await db.oneOrNone(employeeQueries.cargoExist, [idCargo, id_empresa]);
   if (!cargoFound) {
-    throw new Error('no existe un cargo con el id ingresado');
+    throw new Error('no existe un cargo con el id ingresado en la empresa seleccionada');
+  }
+  return true;
+};
+
+exports.personaExist = async (ci, { req }) => {
+  const persona = await db.oneOrNone(employeeQueries.getPersona, [ci]);
+  if (!persona) {
+    throw new Error('No existe ninguna persona con esa cedula en el sistema');
   }
   return true;
 };

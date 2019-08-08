@@ -12,7 +12,10 @@ exports.userExist = async (user, { req }) => {
 };
 
 exports.dePerfilExist = async (dePerfil, { req }) => {
-  const id_empresa = req.body.idEmpresa;
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
   const dePerfilFound = await db.oneOrNone(adminQueries.dePerfilExist, [dePerfil, id_empresa]);
   if (dePerfilFound) {
     throw new Error('Ya existe un perfil con la descripcion ingresada');

@@ -1,5 +1,5 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 
 const empresaValidators = require('./custom_validators/empresa');
 const authValidators = require('./custom_validators/auth');
@@ -128,7 +128,134 @@ router.post(
       .withMessage('Por favor ingrese el id de la empresa')
       .isInt()
       .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist)
   ],
   employeeControllers.createEmployee
+);
+
+router.post(
+  '/addCargoToPersona',
+  isAuth,
+  [
+    body('idCargo')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del cargo')
+      .custom(employeeValidators.cargoExist),
+    body('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    body('ci')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.personaExist)
+  ],
+  employeeControllers.addCargoToPersona
+);
+
+router.delete(
+  '/deleteCargo/:idEmpresa/:idCargo',
+  isAuth,
+  [
+    param('idCargo')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del cargo')
+      .custom(employeeValidators.cargoExist),
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist)
+  ],
+  employeeControllers.deleteCargo
+);
+
+router.delete(
+  '/removeCargoFromPersona/:idEmpresa/:idCargo/:ci',
+  isAuth,
+  [
+    param('idCargo')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del cargo')
+      .custom(employeeValidators.cargoExist),
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('ci')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.personaExist)
+  ],
+  employeeControllers.removeCargoFromPersona
+);
+
+router.get(
+  '/getCargosEmpresa/:idEmpresa',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist)
+  ],
+  employeeControllers.getCargosEmpresa
+);
+
+router.put(
+  '/updateCargo',
+  isAuth,
+  [
+    body('idCargo')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del cargo')
+      .custom(employeeValidators.cargoExist),
+    body('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    body('deCargo')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese la descripcion perfil')
+      .custom(employeeValidators.deCargoExist)
+  ],
+  employeeControllers.updateCargo
 );
 module.exports = router;

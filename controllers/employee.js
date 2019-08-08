@@ -7,7 +7,9 @@ const adminQueries = require('../sql/queries/admin');
 const employeeQueries = require('../sql/queries/employee');
 const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
+const permissionHandler = require('../util/permissionHandler');
 
+//METODO PARA CREAR USUARIO SI LA PERSONA YA EXISTE EN LA EMPRESA
 exports.createUser = async (req, res, next) => {
   try {
     validationHandler(req);
@@ -23,27 +25,53 @@ exports.createUser = async (req, res, next) => {
   }
 };
 
-exports.PLANTILLA = async (req, res, next) => {
-  try {
-    validationHandler(req);
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
-// exports.createEmployee;
 exports.createEmployee = async (req, res, next) => {
   try {
     validationHandler(req);
+    const nombre = req.body.nombre;
+    const apellido = req.body.apellido;
+    const email = req.body.email;
+    const telf = req.body.telf;
+    const ci = req.body.ci;
+    const pais = req.body.pais;
+    const estado = req.body.estado;
+    const ciudad = req.body.ciudad;
+    const calle = req.body.calle;
+    const id_cargo = req.body.idCargo;
+    const id_empresa = req.body.idEmpresa;
+    const id_usuario = req.id_usuario;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    db.task(async con => {
+      try {
+        const direccion = await con.one(authQueries.insertDireccion, [pais, estado, ciudad, calle]);
+        const persona = await con.one(authQueries.insertPersona, [
+          direccion.id_direccion,
+          nombre,
+          apellido,
+          email,
+          telf,
+          ci
+        ]);
+        await con.none(employeeQueries.addCargoToPersona, [persona.ci_persona, id_cargo]);
+        res.status(201).json({ msg: 'empleado creado!' });
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
   } catch (err) {
     errorHandler(err, next);
   }
 };
-// exports.updateEmployee;
+// exports.updateEmployeePorfile;
 //exports.getEmployees
+//getEmployee
 
 // exports.updateEmployeeAddress
-//
 
 exports.createCargo = async (req, res, next) => {
   try {
@@ -51,25 +79,134 @@ exports.createCargo = async (req, res, next) => {
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
     const de_cargo = req.body.deCargo;
-    const permission = await db.manyOrNone(adminQueries.searchPermission, [
+    await permissionHandler(
+      id_empresa,
       id_usuario,
       5,
-      id_empresa
-    ]);
-    if (!permission) {
-      const err = new Error('No se tienen permisos para manejar empleados');
-      err.statusCode = 401;
-      throw err;
-    }
-    await db.none(employeeQueries.createCargo, [id_empresa, de_cargo]);
-    res.status(201).json({ msg: 'cargo creado!', descripcionCargo: de_cargo });
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    const cargo = await db.one(employeeQueries.createCargo, [id_empresa, de_cargo]);
+    res.status(201).json({ msg: 'cargo creado!', cargo });
   } catch (err) {
     errorHandler(err, next);
   }
 };
-// exports.updateCargo
-//exports.getCargos
 
-// exports.addCargoToPersona;
+exports.updateCargo = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    const id_cargo = req.body.idCargo;
+    const de_cargo = req.body.deCargo;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados'
+    );
+    const updatedCargo = await db.one(employeeQueries.updateCargo, [de_cargo, id_cargo]);
+    res.status(200).json({ updatedCargo });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
 
-//exports.removeCargoFromPersona
+exports.getCargosEmpresa = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados'
+    );
+    const cargos = await db.manyOrNone(employeeQueries.getCargosEmpresa, [id_empresa]);
+    res.status(200).json({ cargos });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.addCargoToPersona = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    const id_cargo = req.body.idCargo;
+    const ci_persona = req.body.ci;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados'
+    );
+    const cargos = await db.manyOrNone(employeeQueries.getCargosPersona, [ci_persona]);
+    for (const cargo of cargos) {
+      if (cargo.id_cargo === +id_cargo) {
+        const err = new Error('La persona ingresada ya posee el cargo ingresado');
+        err.statusCode = 422;
+        throw err;
+      }
+    }
+    await db.none(employeeQueries.addCargoToPersona, [ci_persona, id_cargo]);
+    res.status(200).json({ msg: 'cargo anadido!' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.removeCargoFromPersona = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    const id_cargo = req.params.idCargo;
+    const ci_persona = req.params.ci;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados'
+    );
+    const cargoFound = await db.oneOrNone(employeeQueries.personaHaveCargo, [id_cargo, ci_persona]);
+    if (!cargoFound) {
+      const err = new Error('la persona ingresada no posee el cargo a eliminar');
+      err.statusCode = 422;
+      throw err;
+    }
+    await db.none(employeeQueries.removeCargoFromPersona, [id_cargo, ci_persona]);
+    res.status(200).json({ msg: 'cargo removido' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.deleteCargo = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    const id_cargo = req.params.idCargo;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    await db.none(employeeQueries.deleteCargo, [id_cargo]);
+    res.status(200).json({ msg: 'cargo eliminado' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.PLANTILLA = async (req, res, next) => {
+  try {
+    validationHandler(req);
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
