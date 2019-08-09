@@ -210,7 +210,7 @@ router.delete(
       .withMessage('Debe de ingresar una cedula')
       .isInt()
       .withMessage('La cedula debe de ser un numero entero')
-      .custom(employeeValidators.personaExist)
+      .custom(employeeValidators.isEmployee)
   ],
   employeeControllers.removeCargoFromPersona
 );
@@ -257,5 +257,143 @@ router.put(
       .custom(employeeValidators.deCargoExist)
   ],
   employeeControllers.updateCargo
+);
+
+router.put(
+  '/updateEmployeeAddress',
+  isAuth,
+  [
+    body('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    body('ci')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.isEmployee),
+    body('pais')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese un pais'),
+    body('estado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese un estado'),
+    body('ciudad')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese una ciudad'),
+    body('calle')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese una calle')
+  ],
+  employeeControllers.updateEmployeeAddress
+);
+
+router.get(
+  '/getEmployee/:idEmpresa/:ci',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('ci')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.isEmployee)
+  ],
+  employeeControllers.getEmployee
+);
+
+router.get(
+  '/getEmployees/:idEmpresa',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist)
+  ],
+  employeeControllers.getEmployees
+);
+
+router.put(
+  '/updateEmployeeProfile',
+  isAuth,
+  [
+    body('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    body('oldCi')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.isEmployee),
+    body('email', 'Porfavor ingrese un correo valido..')
+      .trim()
+      .not()
+      .isEmpty()
+      .isEmail()
+      .normalizeEmail()
+      .custom(employeeValidators.updateEmail),
+    body('newCi')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.updateCi),
+    body('nombre')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar un nombre'),
+    body('apellido')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar un apellido'),
+    body('telf')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('El numero de telefono no puede estar vacio')
+  ],
+  employeeControllers.updateEmployeeProfile
 );
 module.exports = router;

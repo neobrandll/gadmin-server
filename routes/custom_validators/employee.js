@@ -1,6 +1,7 @@
 const db = require('../../sql/db');
 
 const employeeQueries = require('../../sql/queries/employee');
+const authQueries = require('../../sql/queries/auth');
 
 exports.createUser = async (ci, { req }) => {
   const persona = await db.oneOrNone(employeeQueries.getPersona, [ci]);
@@ -42,6 +43,41 @@ exports.personaExist = async (ci, { req }) => {
   const persona = await db.oneOrNone(employeeQueries.getPersona, [ci]);
   if (!persona) {
     throw new Error('No existe ninguna persona con esa cedula en el sistema');
+  }
+  return true;
+};
+
+//funcion para verificar que la ci ingresada es de un empleado de esa empresa
+exports.isEmployee = async (ci, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const personaFound = await db.oneOrNone(employeeQueries.isEmployee, [id_empresa, ci]);
+  if (!personaFound) {
+    throw new Error(
+      'La cedula ingresada no corresponde a ningun trabajador de la empresa seleccionada'
+    );
+  }
+  return true;
+};
+
+exports.updateEmail = async (email, { req }) => {
+  const oldCi = req.body.oldCi;
+  const persona = await db.oneOrNone(employeeQueries.getPersonaWithEmail, [email]);
+  if (persona && persona.ci_persona !== oldCi) {
+    throw new Error('El correo ingresado ya esta en uso.');
+  }
+  return true;
+};
+
+exports.updateCi = async (newCi, { req }) => {
+  const oldCi = req.body.oldCi;
+  if (oldCi !== newCi) {
+    const ciFound = await db.oneOrNone(authQueries.findCi, [newCi]);
+    if (ciFound) {
+      throw new Error('La cedula ingresada ya esta en uso.');
+    }
   }
   return true;
 };

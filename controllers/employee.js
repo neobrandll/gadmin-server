@@ -68,10 +68,103 @@ exports.createEmployee = async (req, res, next) => {
   }
 };
 // exports.updateEmployeePorfile;
-//exports.getEmployees
-//getEmployee
 
-// exports.updateEmployeeAddress
+exports.updateEmployeeProfile = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const no_persona = req.body.nombre;
+    const ap_persona = req.body.apellido;
+    const te_persona = req.body.telf;
+    const newCi = req.body.newCi;
+    const oldCi = req.body.oldCi;
+    const email = req.body.email;
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    const updatedProfile = await db.one(employeeQueries.updateEmployeeProfile, [
+      no_persona,
+      ap_persona,
+      te_persona,
+      newCi,
+      email,
+      oldCi
+    ]);
+    res.status(200).json({ updatedProfile });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getEmployees = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    const employees = await db.any(employeeQueries.getEmployees, [id_empresa]);
+    res.status(200).json({ employees });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getEmployee = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    const ci_persona = req.params.ci;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    const employee = await db.many(employeeQueries.getEmployee, [id_empresa, ci_persona]);
+    res.status(200).json({ employee });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.updateEmployeeAddress = async (req, res, next) => {
+  try {
+    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    const pais = req.body.pais;
+    const estado = req.body.estado;
+    const ciudad = req.body.ciudad;
+    const calle = req.body.calle;
+    const ci_persona = req.body.ci;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      5,
+      'No se tienen permisos para manejar empleados o cargos'
+    );
+    const updatedAddress = await db.one(employeeQueries.updateEmployeeAddress, [
+      pais,
+      estado,
+      ciudad,
+      calle,
+      ci_persona
+    ]);
+    res.status(200).json({ updatedAddress });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
 
 exports.createCargo = async (req, res, next) => {
   try {
