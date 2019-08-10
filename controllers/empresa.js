@@ -9,7 +9,7 @@ const sendEmail = require('../util/email');
 
 exports.getProfiles = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.id_empresa;
     const perfiles = await db.manyOrNone(empresaQueries.getProfiles, [id_usuario, id_empresa]);
@@ -30,7 +30,7 @@ exports.getProfiles = async (req, res, next) => {
 
 exports.createEmpresa = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const pais = req.body.pais;
     const estado = req.body.estado;
     const ciudad = req.body.ciudad;
@@ -62,7 +62,7 @@ exports.createEmpresa = async (req, res, next) => {
 
 exports.updateAddress = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_empresa = req.body.idEmpresa;
     const pais = req.body.pais;
     const estado = req.body.estado;
@@ -90,7 +90,7 @@ exports.updateAddress = async (req, res, next) => {
 
 exports.getEmpresa = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_empresa = req.params.id_empresa;
     const empresa = await db.one(empresaQueries.getEmpresa, [id_empresa]);
     res.status(200).json({ empresa });
@@ -101,7 +101,7 @@ exports.getEmpresa = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const ri_empresa = req.body.rifEmpresa;
     const no_empresa = req.body.nombreEmpresa;
     const id_empresa = req.body.idEmpresa;

@@ -12,7 +12,7 @@ const permissionHandler = require('../util/permissionHandler');
 //METODO PARA CREAR USUARIO SI LA PERSONA YA EXISTE EN LA EMPRESA
 exports.createUser = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const ci_persona = req.body.ci;
     const persona = await db.one(employeeQueries.getPersona, [ci_persona]);
     const pw = req.body.password;
@@ -27,7 +27,7 @@ exports.createUser = async (req, res, next) => {
 
 exports.createEmployee = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const nombre = req.body.nombre;
     const apellido = req.body.apellido;
     const email = req.body.email;
@@ -67,11 +67,10 @@ exports.createEmployee = async (req, res, next) => {
     errorHandler(err, next);
   }
 };
-// exports.updateEmployeePorfile;
 
 exports.updateEmployeeProfile = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const no_persona = req.body.nombre;
     const ap_persona = req.body.apellido;
     const te_persona = req.body.telf;
@@ -102,7 +101,7 @@ exports.updateEmployeeProfile = async (req, res, next) => {
 
 exports.getEmployees = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     await permissionHandler(
@@ -120,7 +119,7 @@ exports.getEmployees = async (req, res, next) => {
 
 exports.getEmployee = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     const ci_persona = req.params.ci;
@@ -139,7 +138,7 @@ exports.getEmployee = async (req, res, next) => {
 
 exports.updateEmployeeAddress = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
     const pais = req.body.pais;
@@ -168,7 +167,7 @@ exports.updateEmployeeAddress = async (req, res, next) => {
 
 exports.createCargo = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
     const de_cargo = req.body.deCargo;
@@ -187,7 +186,7 @@ exports.createCargo = async (req, res, next) => {
 
 exports.updateCargo = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
     const id_cargo = req.body.idCargo;
@@ -207,7 +206,7 @@ exports.updateCargo = async (req, res, next) => {
 
 exports.getCargosEmpresa = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     await permissionHandler(
@@ -225,7 +224,7 @@ exports.getCargosEmpresa = async (req, res, next) => {
 
 exports.addCargoToPersona = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
     const id_cargo = req.body.idCargo;
@@ -253,7 +252,7 @@ exports.addCargoToPersona = async (req, res, next) => {
 
 exports.removeCargoFromPersona = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     const id_cargo = req.params.idCargo;
@@ -279,7 +278,7 @@ exports.removeCargoFromPersona = async (req, res, next) => {
 
 exports.deleteCargo = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     const id_cargo = req.params.idCargo;
@@ -291,14 +290,6 @@ exports.deleteCargo = async (req, res, next) => {
     );
     await db.none(employeeQueries.deleteCargo, [id_cargo]);
     res.status(200).json({ msg: 'cargo eliminado' });
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
-exports.PLANTILLA = async (req, res, next) => {
-  try {
-    validationHandler(req);
   } catch (err) {
     errorHandler(err, next);
   }

@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
 
-const validationHandler = req => {
+const validationHandler = async req => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const err = new Error('Fallo de validacion');

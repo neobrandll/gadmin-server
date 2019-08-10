@@ -163,7 +163,7 @@ exports.updateProfile = async (req, res, next) => {
 
 exports.updateEmail = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const email = req.body.email;
     const password = req.body.password;
     const id_usuario = req.id_usuario;
@@ -193,7 +193,7 @@ exports.updateEmail = async (req, res, next) => {
 
 exports.sendTokenPassword = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     let resetTokenExpiration;
     let newToken;
     const email = validator.normalizeEmail(req.body.email);
@@ -250,7 +250,7 @@ exports.sendTokenPassword = async (req, res, next) => {
 
 exports.updatePassword = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const password = req.body.password;
     const email = validator.normalizeEmail(req.body.email);
     const pwToken = req.body.pwToken;
@@ -286,7 +286,7 @@ exports.updatePassword = async (req, res, next) => {
 
 exports.getUserData = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const userData = await db.one(authQueries.getUserData, [id_usuario]);
     res.status(200).json({ userData });

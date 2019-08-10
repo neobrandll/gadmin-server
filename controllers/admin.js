@@ -10,7 +10,7 @@ const sendEmail = require('../util/email');
 
 exports.addProfileToUser = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const receiverUser = req.body.user;
     const id_profile = req.body.idProfile;
@@ -40,7 +40,7 @@ exports.addProfileToUser = async (req, res, next) => {
 
 exports.removeProfileFromUser = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const receiverUser = req.params.user;
     const id_perfil = req.params.idPerfil;
@@ -66,11 +66,11 @@ exports.removeProfileFromUser = async (req, res, next) => {
 };
 
 exports.createProfile = async (req, res, next) => {
-  const id_usuario = req.id_usuario;
-  const id_empresa = req.body.idEmpresa;
-  const de_perfil = req.body.dePerfil.toLowerCase();
   try {
-    validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    const de_perfil = req.body.dePerfil.toLowerCase();
+    await validationHandler(req);
     await permissionHandler(
       id_empresa,
       id_usuario,
@@ -86,7 +86,7 @@ exports.createProfile = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_perfil = req.body.idPerfil;
     const de_perfil = req.body.dePerfil.toLowerCase();
@@ -106,7 +106,7 @@ exports.updateProfile = async (req, res, next) => {
 
 exports.deleteProfile = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_perfil = req.params.idPerfil;
     const id_empresa = req.params.idEmpresa;
@@ -125,7 +125,7 @@ exports.deleteProfile = async (req, res, next) => {
 
 exports.getProfilesEmpresa = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     await permissionHandler(
@@ -142,7 +142,7 @@ exports.getProfilesEmpresa = async (req, res, next) => {
 };
 exports.addPermissionToProfile = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_permissionsArr = req.body.idPermissionsArr;
     const id_profile = req.body.idPerfil;
     const id_usuario = req.id_usuario;
@@ -176,7 +176,7 @@ exports.addPermissionToProfile = async (req, res, next) => {
 
 exports.updatePermissionProfile = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_permissionsArr = req.body.idPermissionsArr;
     const id_perfil = req.body.idPerfil;
     const id_usuario = req.id_usuario;
