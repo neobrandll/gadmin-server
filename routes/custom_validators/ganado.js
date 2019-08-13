@@ -57,13 +57,20 @@ exports.tipoGanado = (tipoGanado, { req }) => {
 };
 
 exports.razaExistOrMestizo = async (id_raza, { req }) => {
-  const raza = '' + id_raza;
-  if (raza.toLowerCase() === 'mestizo') {
-    return true;
-  }
   let id_empresa = req.body.idEmpresa;
   if (!id_empresa) {
     id_empresa = req.params.idEmpresa;
+  }
+  const raza = '' + id_raza;
+  if (raza.toLowerCase() === 'mestizo') {
+    const mestizoFound = await db.oneOrNone(ganadoQueries.deRazaExist, ['mestizo', id_empresa]);
+    if (mestizoFound) {
+      req.id_mestizo = mestizoFound.id_raza;
+      return true;
+    }
+    const newMestizo = await db.one(ganadoQueries.createRaza, [id_empresa, 'Mestizo']);
+    req.id_mestizo = newMestizo.id_raza;
+    return true;
   }
   const razaFound = await db.oneOrNone(ganadoQueries.razaExist, [id_raza, id_empresa]);
   if (!razaFound) {
@@ -72,43 +79,101 @@ exports.razaExistOrMestizo = async (id_raza, { req }) => {
   return true;
 };
 
-//validador de que existe el padre o madre del ganado
-exports.idPaMaGanado = async (id, { req }) => {
-  if (id === '-1') {
+exports.coPaGanado = async (codigo, { req }) => {
+  if (codigo === '-1') {
     return true;
   }
   let id_empresa = req.body.idEmpresa;
   if (!id_empresa) {
     id_empresa = req.params.idEmpresa;
   }
-  const ganadoFound = await db.oneOrNone(ganadoQueries.ganadoExist, [id, id_empresa]);
+  const codigoGanado = req.body.coGanado;
+  if (codigoGanado === codigo) {
+    throw new Error('El codigo del padre no puede ser el mismo que el del ganado');
+  }
+  const ganadoFound = await db.oneOrNone(ganadoQueries.codigoExist, [codigo, id_empresa]);
   if (!ganadoFound) {
-    throw new Error('no existe ningun ganado con el id ingresado en la empresa');
+    throw new Error('no existe ningun ganado con el codigo ingresado en la empresa');
+  }
+  if (ganadoFound.id_tipo_ganado !== 1) {
+    throw new Error('El padre debe de ser macho!');
   }
   return true;
 };
 
-exports.idPajuela = async (id, { req }) => {
-  if (id === '-1') {
+exports.coMaGanado = async (codigo, { req }) => {
+  if (codigo === '-1') {
     return true;
   }
   let id_empresa = req.body.idEmpresa;
   if (!id_empresa) {
     id_empresa = req.params.idEmpresa;
   }
-  const pajuelaFound = await db.oneOrNone(ganadoQueries.pajuelaExist, [id, id_empresa]);
-  if (!pajuelaFound) {
-    throw new Error('no existe ninguna pajuela con el id ingresado en la empresa');
+  const codigoGanado = req.body.coGanado;
+  if (codigoGanado === codigo) {
+    throw new Error('El codigo del padre no puede ser el mismo que el del ganado');
+  }
+  const ganadoFound = await db.oneOrNone(ganadoQueries.codigoExist, [codigo, id_empresa]);
+  if (!ganadoFound) {
+    throw new Error('no existe ningun ganado con el codigo ingresado en la empresa');
+  }
+  if (ganadoFound.id_tipo_ganado !== 2) {
+    throw new Error('La madre debe de ser hembra');
   }
   return true;
 };
 
-exports.codigoExist = async (codigo, { req }) => {
+exports.coPajuela = async (codigo, { req }) => {
+  if (codigo === '-1') {
+    return true;
+  }
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const pajuelaFound = await db.oneOrNone(ganadoQueries.pajuelaExist, [codigo, id_empresa]);
+  if (!pajuelaFound) {
+    throw new Error('no existe ninguna pajuela con el codigo ingresado en la empresa');
+  }
+  return true;
+};
+
+exports.coGanadoAvailable = async (codigo, { req }) => {
   let id_empresa = req.body.idEmpresa;
   if (!id_empresa) {
     id_empresa = req.params.idEmpresa;
   }
   const codigoFound = await db.oneOrNone(ganadoQueries.codigoExist, [codigo, id_empresa]);
+  if (codigoFound) {
+    throw new Error('ya existe un ganado con el mismo codigo en la empresa');
+  }
+  return true;
+};
+
+exports.coGanadoExist = async (codigo, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const ganadoFound = await db.oneOrNone(ganadoQueries.codigoExist, [codigo, id_empresa]);
+  if (!ganadoFound) {
+    throw new Error('No existe un ganado con el codigo ingresado en la empresa');
+  }
+  //aqui adjunto la direccion de la foto para eliminarla si se actualiza;
+  req.fo_ganado = ganadoFound.fo_ganado;
+  return true;
+};
+
+exports.newCoGanado = async (newCodigo, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const oldCoGanado = req.body.coGanado;
+  if (oldCoGanado === newCodigo) {
+    return true;
+  }
+  const codigoFound = await db.oneOrNone(ganadoQueries.codigoExist, [newCodigo, id_empresa]);
   if (codigoFound) {
     throw new Error('ya existe un ganado con el mismo codigo en la empresa');
   }

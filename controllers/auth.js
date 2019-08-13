@@ -101,7 +101,7 @@ exports.login = async (req, res, next) => {
         empresas
       }
     };
-    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+    const token = jwt.sign(payload, secret, { expiresIn: '5h' });
     res.status(200).json({ token, payload, msg: 'inicio de sesion satisfactorio!' });
   } catch (err) {
     errorHandler(err, next);
@@ -154,7 +154,7 @@ exports.updateProfile = async (req, res, next) => {
     };
     const updatedUser = await db.one(authQueries.updateUser, [user, id_usuario]);
     payload.profile.us_usuario = updatedUser.us_usuario;
-    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+    const token = jwt.sign(payload, secret, { expiresIn: '5h' });
     res.status(200).json({ token, profile: payload.profile, msg: 'Perfil actualizado!' });
   } catch (err) {
     errorHandler(err, next);
@@ -184,7 +184,7 @@ exports.updateEmail = async (req, res, next) => {
       id_usuario: req.id_usuario,
       profile: { ...req.profile, em_persona: updatedEmail.em_persona }
     };
-    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+    const token = jwt.sign(payload, secret, { expiresIn: '5h' });
     res.status(200).json({ token, msg: 'correo Actualizado!', profile: payload.profile });
   } catch (err) {
     errorHandler(err, next);
