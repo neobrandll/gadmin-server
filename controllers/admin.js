@@ -134,7 +134,11 @@ exports.getProfilesEmpresa = async (req, res, next) => {
       3,
       'No se tienen permisos para manejar permisologia y perfiles de la empresa'
     );
-    const perfiles = await db.manyOrNone(adminQueries.getProfilesEmpresa, [id_empresa]);
+    let filter = '%%';
+    if (req.query.filter) {
+      filter = `%${req.query.filter}%`;
+    }
+    const perfiles = await db.manyOrNone(adminQueries.getProfilesEmpresa, [filter, id_empresa]);
     res.status(200).json({ perfiles });
   } catch (err) {
     errorHandler(err, next);

@@ -55,7 +55,10 @@ module.exports = {
       'WHERE id_usuario = (SELECT id_usuario FROM usuario WHERE us_usuario = $1) ' +
       'AND id_perfil = $2'
   ),
-  getProfilesEmpresa: new PS('getProfilesEmpresa', 'SELECT * FROM perfil WHERE id_empresa = $1'),
+  getProfilesEmpresa: new PS(
+    'getProfilesEmpresa',
+    'SELECT * FROM perfil WHERE de_perfil ILIKE $1 AND id_empresa = $2'
+  ),
   removePermissionsFromProfile: new PS(
     'removePermissionsFromProfile',
     'DELETE FROM permiso_perfil WHERE id_perfil = $1'

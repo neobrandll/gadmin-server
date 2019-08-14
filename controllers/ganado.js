@@ -2,13 +2,14 @@ const fs = require('fs');
 
 const db = require('../sql/db.js');
 const ganadoQueries = require('../sql/queries/ganado');
+const PS = require('pg-promise').PreparedStatement;
 
 const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
 //PARA LOS GET DEL GANADO
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 5;
 
 exports.getRazas = async (req, res, next) => {
   try {
@@ -21,7 +22,11 @@ exports.getRazas = async (req, res, next) => {
       6,
       'No se tienen permisos para manejar ganado y/o razas'
     );
-    const razas = await db.any(ganadoQueries.getRazas, [id_empresa]);
+    let filter = '%%';
+    if (req.query.filter) {
+      filter = `%${req.query.filter}%`;
+    }
+    const razas = await db.any(ganadoQueries.getRazas, [filter, id_empresa]);
     res.status(200).json({ razas });
   } catch (err) {
     errorHandler(err, next);
@@ -138,8 +143,8 @@ exports.updateGanado = async (req, res, next) => {
       co_paGanado = req.body.coPaGanado,
       co_maGanado = req.body.coMaGanado,
       co_paPajuela = req.body.coPaPajuela,
-      co_ganado = req.body.coGanado;
-    newCoGanado = req.body.newCoGanado;
+      co_ganado = req.body.coGanado,
+      newCoGanado = req.body.newCoGanado;
 
     let id_raza;
     if (req.id_mestizo) {
@@ -178,135 +183,6 @@ exports.updateGanado = async (req, res, next) => {
   }
 };
 
-exports.getByRaza = async (req, res, next) => {
-  try {
-    await validationHandler(req);
-    const id_usuario = req.id_usuario;
-    const id_empresa = req.params.idEmpresa;
-    await permissionHandler(
-      id_empresa,
-      id_usuario,
-      6,
-      'No se tienen permisos para manejar ganado y/o razas'
-    );
-    const page = +req.query.page || 1;
-    const offset = (page - 1) * ITEMS_PER_PAGE;
-    const id_raza = req.params.idRaza;
-    db.task(async con => {
-      try {
-        let totalItems = await con.one(ganadoQueries.countGetByRaza, [id_raza, id_empresa]);
-        totalItems = totalItems.count;
-        const rs = await con.any(ganadoQueries.getByRaza, [
-          id_raza,
-          id_empresa,
-          offset,
-          ITEMS_PER_PAGE
-        ]);
-        res.status(200).json({
-          rs,
-          currentPage: page,
-          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-          hasPreviousPage: page > 1,
-          nextPage: page + 1,
-          previousPage: page - 1,
-          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-          totalItems
-        });
-      } catch (err) {
-        errorHandler(err, next);
-      }
-    });
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
-exports.getByEstado = async (req, res, next) => {
-  try {
-    await validationHandler(req);
-    const id_usuario = req.id_usuario;
-    const id_empresa = req.params.idEmpresa;
-    await permissionHandler(
-      id_empresa,
-      id_usuario,
-      6,
-      'No se tienen permisos para manejar ganado y/o razas'
-    );
-    const id_estado = req.params.idEstadoGanado;
-    const page = +req.query.page || 1;
-    const offset = (page - 1) * ITEMS_PER_PAGE;
-    db.task(async con => {
-      try {
-        let totalItems = await con.one(ganadoQueries.countGetByEstado, [id_estado, id_empresa]);
-        totalItems = totalItems.count;
-        const rs = await con.any(ganadoQueries.getByEstado, [
-          id_estado,
-          id_empresa,
-          offset,
-          ITEMS_PER_PAGE
-        ]);
-        res.status(200).json({
-          rs,
-          currentPage: page,
-          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-          hasPreviousPage: page > 1,
-          nextPage: page + 1,
-          previousPage: page - 1,
-          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-          totalItems
-        });
-      } catch (err) {
-        errorHandler(err, next);
-      }
-    });
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
-exports.getByTipo = async (req, res, next) => {
-  try {
-    await validationHandler(req);
-    const id_usuario = req.id_usuario;
-    const id_empresa = req.params.idEmpresa;
-    await permissionHandler(
-      id_empresa,
-      id_usuario,
-      6,
-      'No se tienen permisos para manejar ganado y/o razas'
-    );
-    const id_tipo = req.params.tipoGanado;
-    const page = +req.query.page || 1;
-    const offset = (page - 1) * ITEMS_PER_PAGE;
-    db.task(async con => {
-      try {
-        let totalItems = await con.one(ganadoQueries.countGetByTipo, [id_tipo, id_empresa]);
-        totalItems = totalItems.count;
-        const rs = await con.any(ganadoQueries.getByTipo, [
-          id_tipo,
-          id_empresa,
-          offset,
-          ITEMS_PER_PAGE
-        ]);
-        res.status(200).json({
-          rs,
-          currentPage: page,
-          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-          hasPreviousPage: page > 1,
-          nextPage: page + 1,
-          previousPage: page - 1,
-          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-          totalItems
-        });
-      } catch (err) {
-        errorHandler(err, next);
-      }
-    });
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
 exports.getGanado = async (req, res, next) => {
   try {
     validationHandler(req);
@@ -333,7 +209,7 @@ exports.getGanado = async (req, res, next) => {
   }
 };
 
-exports.getByLote = async (req, res, next) => {
+exports.searchGanado = async (req, res, next) => {
   try {
     await validationHandler(req);
     const id_usuario = req.id_usuario;
@@ -344,16 +220,55 @@ exports.getByLote = async (req, res, next) => {
       6,
       'No se tienen permisos para manejar ganado y/o razas'
     );
-    const id_lote = req.params.idLote;
     const page = +req.query.page || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;
+    let countPS = 'SELECT COUNT(id_ganado) FROM ganado WHERE id_empresa = $1';
+    let searchPS = 'SELECT id_ganado, co_ganado, fo_ganado FROM ganado WHERE id_empresa = $1';
+    let pCount = 2;
+    const paramsArr = [id_empresa];
+    if (req.query.idRaza) {
+      searchPS += ` AND id_raza = $${pCount}`;
+      countPS += ` AND id_raza = $${pCount}`;
+      paramsArr.push(req.query.idRaza);
+      pCount++;
+    }
+    if (req.query.idLote) {
+      searchPS += ` AND id_lote = $${pCount}`;
+      countPS += ` AND id_lote = $${pCount}`;
+      paramsArr.push(req.query.idLote);
+      pCount++;
+    }
+    if (req.query.idEstadoGanado) {
+      searchPS += ` AND id_estado_ganado = $${pCount}`;
+      countPS += ` AND id_estado_ganado = $${pCount}`;
+      paramsArr.push(req.query.idEstadoGanado);
+      pCount++;
+    }
+    if (req.query.tipoGanado) {
+      searchPS += ` AND id_tipo_ganado = $${pCount}`;
+      countPS += ` AND id_tipo_ganado = $${pCount}`;
+      paramsArr.push(req.query.tipoGanado);
+      pCount++;
+    }
+    if (req.query.dateFrom) {
+      searchPS += ` AND fe_ganado >= $${pCount}`;
+      countPS += ` AND fe_ganado >= $${pCount}`;
+      paramsArr.push(req.query.dateFrom);
+      pCount++;
+    }
+    if (req.query.dateTo) {
+      searchPS += ` AND fe_ganado <= $${pCount}`;
+      countPS += ` AND fe_ganado <= $${pCount}`;
+      paramsArr.push(req.query.dateTo);
+      pCount++;
+    }
+    searchPS += `OFFSET $${pCount} LIMIT $${pCount + 1}`;
     db.task(async con => {
       try {
-        let totalItems = await con.one(ganadoQueries.countGetByLote, [id_lote, id_empresa]);
+        let totalItems = await con.one(new PS('countTotalGanado', countPS), paramsArr);
         totalItems = totalItems.count;
-        const rs = await con.any(ganadoQueries.getByLote, [
-          id_lote,
-          id_empresa,
+        const rs = await con.any(new PS('searchGanadoBy', searchPS), [
+          ...paramsArr,
           offset,
           ITEMS_PER_PAGE
         ]);

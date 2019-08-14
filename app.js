@@ -15,6 +15,7 @@ const adminRoutes = require('./routes/admin');
 const employeeRoutes = require('./routes/employee');
 const ganadoRoutes = require('./routes/ganado');
 const loteRoutes = require('./routes/lote');
+const potreroRoutes = require('./routes/potrero');
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/admin', adminRoutes);
 app.use('/employee', employeeRoutes);
 app.use('/ganado', ganadoRoutes);
 app.use('/lote', loteRoutes);
+app.use('/potrero', potreroRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);

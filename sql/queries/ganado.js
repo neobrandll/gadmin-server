@@ -9,7 +9,7 @@ module.exports = {
     'createRaza',
     'INSERT INTO raza (id_empresa, de_raza) VALUES ($1, $2) RETURNING *'
   ),
-  getRazas: new PS('getRazas', 'SELECT * FROM raza WHERE id_empresa = $1'),
+  getRazas: new PS('getRazas', 'SELECT * FROM raza WHERE de_raza ILIKE $1 AND id_empresa = $2'),
   updateRaza: new PS(
     'updateRaza',
     'UPDATE raza SET de_raza = $1 WHERE id_raza = $2 AND id_empresa = $3 RETURNING *'
@@ -39,42 +39,6 @@ module.exports = {
     'UPDATE ganado SET id_raza = $1, id_estado_ganado = $2 ,id_tipo_ganado = $3 , ' +
       'pe_ganado = $4 ,fe_ganado = $5 ,co_pa_ganado = $6 ,co_ma_ganado = $7, co_pa_pajuela = $8  ' +
       ',fo_ganado = $9, co_ganado = $10 WHERE co_ganado = $11 AND id_empresa = $12 RETURNING *'
-  ),
-  getByRaza: new PS(
-    'getByRaza',
-    'SELECT id_ganado, co_ganado, fo_ganado FROM ganado WHERE id_raza = $1 AND id_empresa = $2 OFFSET $3 LIMIT $4'
-  ),
-  countGetByRaza: new PS(
-    'countGetByRaza',
-    'SELECT COUNT(id_ganado) FROM ganado WHERE id_raza = $1 AND id_empresa = $2'
-  ),
-  getByEstado: new PS(
-    'getByEstado',
-    'SELECT id_ganado, co_ganado, fo_ganado FROM ganado WHERE id_estado_ganado = $1 AND id_empresa = $2 OFFSET $3 LIMIT $4'
-  ),
-  countGetByEstado: new PS(
-    'countGetByEstado',
-    'SELECT COUNT(id_ganado) FROM ganado WHERE id_estado_ganado = $1 AND id_empresa = $2 '
-  ),
-  getByTipo: new PS(
-    'getByTipo',
-    'SELECT id_ganado, co_ganado, fo_ganado FROM ganado WHERE id_tipo_ganado = $1 AND id_empresa = $2 OFFSET $3 LIMIT $4'
-  ),
-  countGetByTipo: new PS(
-    'countGetByTipo',
-    'SELECT COUNT(id_ganado) FROM ganado WHERE id_tipo_ganado = $1 AND id_empresa = $2'
-  ),
-  getByLote: new PS(
-    'getByLote',
-    'SELECT id_ganado, co_ganado, fo_ganado FROM lote ' +
-      'INNER JOIN lote_ganado USING(id_lote) ' +
-      'INNER JOIN ganado USING(id_ganado) WHERE lote.id_lote = $1 AND lote.id_empresa = $2 OFFSET $3 LIMIT $4'
-  ),
-  countGetByLote: new PS(
-    'countGetByLote',
-    'SELECT COUNT(id_ganado) FROM lote ' +
-      'INNER JOIN lote_ganado USING(id_lote) ' +
-      'INNER JOIN ganado USING(id_ganado) WHERE lote.id_lote = $1 AND lote.id_empresa = $2'
   ),
   getGanado: new PS(
     'getGanado',

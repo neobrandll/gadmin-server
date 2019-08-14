@@ -39,7 +39,10 @@ module.exports = {
       'WHERE id_cargo = $1 ' +
       'AND id_persona = (SELECT id_persona FROM persona WHERE ci_persona = $2)'
   ),
-  getCargosEmpresa: new PS('getCargosEmpresa', 'SELECT * FROM cargo WHERE id_empresa = $1'),
+  getCargosEmpresa: new PS(
+    'getCargosEmpresa',
+    'SELECT * FROM cargo WHERE de_cargo ILIKE $1 AND id_empresa = $2'
+  ),
   updateCargo: new PS(
     'updateCargo',
     'UPDATE cargo SET de_cargo = $1 WHERE id_cargo = $2 RETURNING *'
@@ -60,20 +63,26 @@ module.exports = {
   ),
   getEmployee: new PS(
     'getEmployee',
-    'SELECT persona.*, direccion.*, cargo.* ' +
+    'SELECT persona.*, direccion.* ' +
       'FROM cargo_persona ' +
       'INNER JOIN persona USING(id_persona) ' +
       'INNER JOIN cargo USING(id_cargo) ' +
       'INNER JOIN direccion USING(id_direccion) ' +
-      'WHERE id_empresa = $1 ' +
-      'AND ci_persona = $2'
+      'WHERE id_empresa = $1 AND ci_persona = $2 LIMIT 1'
+  ),
+  getCargosEmployee: new PS(
+    'getCargosEmployee',
+    'SELECT cargo.* FROM cargo_persona ' +
+      'INNER JOIN persona USING(id_persona) ' +
+      'INNER JOIN cargo USING(id_cargo) INNER JOIN direccion USING(id_direccion) ' +
+      'WHERE id_empresa = $1 AND ci_persona = $2'
   ),
   getEmployees: new PS(
     'getEmployees',
     'SELECT persona.* FROM cargo_persona ' +
       'INNER JOIN persona USING(id_persona) ' +
       'INNER JOIN cargo USING(id_cargo) ' +
-      'WHERE id_empresa = $1 GROUP BY persona.id_persona'
+      "WHERE CONCAT(persona.no_persona, ' ', persona.ap_persona) ILIKE $1 AND id_empresa = $2 GROUP BY persona.id_persona"
   ),
   updateEmployeeProfile: new PS(
     'updateEmployeeProfile',

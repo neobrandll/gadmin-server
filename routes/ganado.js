@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 const empresaValidators = require('./custom_validators/empresa');
 const authValidators = require('./custom_validators/auth');
@@ -54,7 +54,7 @@ router.get(
 );
 
 router.put(
-  '/updateRaza',
+  '/raza',
   isAuth,
   [
     body('idEmpresa')
@@ -175,8 +175,79 @@ router.post(
   ganadoControllers.createGanado
 );
 
+router.get(
+  '/search/:idEmpresa',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    query('idLote')
+      .optional()
+      .trim()
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(loteValidators.loteExist),
+    query('idRaza')
+      .optional()
+      .trim()
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(ganadoValidators.razaExist),
+    query('idEstadoGanado')
+      .optional()
+      .trim()
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .isIn(['1', '2', '3', '4'])
+      .withMessage('El id del estado ingresado es incorrecto'),
+    query('tipoGanado')
+      .optional()
+      .trim()
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(ganadoValidators.tipoGanado),
+    query('dateFrom')
+      .optional()
+      .custom(sharedValidator.dateValidator),
+    query('dateTo')
+      .optional()
+      .custom(sharedValidator.dateValidator)
+  ],
+  ganadoControllers.searchGanado
+);
+
+router.get(
+  '/:idEmpresa/:coGanado',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    body('coGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coGanadoExist)
+  ],
+  ganadoControllers.getGanado
+);
+
 router.put(
-  '/updateGanado',
+  '',
   isAuth,
   upload.single('foGanado'),
   [
@@ -257,124 +328,5 @@ router.put(
       .custom(ganadoValidators.coGanadoExist)
   ],
   ganadoControllers.updateGanado
-);
-
-router.get(
-  '/getByRaza/:idEmpresa/:idRaza',
-  isAuth,
-  [
-    param('idRaza')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la raza')
-      .custom(ganadoValidators.razaExist),
-    param('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist)
-  ],
-  ganadoControllers.getByRaza
-);
-
-router.get(
-  '/getByEstado/:idEmpresa/:idEstadoGanado',
-  isAuth,
-  [
-    param('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist),
-    param('idEstadoGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id del estado del ganado')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .isIn(['1', '2', '3', '4'])
-      .withMessage('El id del estado ingresado es incorrecto')
-  ],
-  ganadoControllers.getByEstado
-);
-
-router.get(
-  '/getByTipo/:idEmpresa/:tipoGanado',
-  isAuth,
-  [
-    param('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist),
-    param('tipoGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id del tipo del ganado')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(ganadoValidators.tipoGanado)
-  ],
-  ganadoControllers.getByTipo
-);
-
-router.get(
-  '/getByLote/:idEmpresa/:idLote',
-  isAuth,
-  [
-    param('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist),
-    param('idLote')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de el lote')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(loteValidators.loteExist)
-  ],
-  ganadoControllers.getByLote
-);
-
-router.get(
-  '/getGanado/:idEmpresa/:coGanado',
-  isAuth,
-  [
-    param('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist),
-    body('coGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el codigo del ganado')
-      .isInt()
-      .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coGanadoExist)
-  ],
-  ganadoControllers.getGanado
 );
 module.exports = router;

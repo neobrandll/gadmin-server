@@ -5,22 +5,6 @@ const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
-exports.PLANTILLA = async (req, res, next) => {
-  try {
-    await validationHandler(req);
-    const id_usuario = req.id_usuario;
-    const id_empresa = req.body.idEmpresa;
-    await permissionHandler(
-      id_empresa,
-      id_usuario,
-      7,
-      'No se tienen permisos para manipular el modulo lote'
-    );
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
 exports.createLote = async (req, res, next) => {
   try {
     await validationHandler(req);
@@ -54,7 +38,7 @@ exports.updateLote = async (req, res, next) => {
     const id_lote = req.body.idLote;
     const de_lote = req.body.deLote.toLowerCase();
     const updatedlote = await db.one(loteQueries.updateLote, [de_lote, id_empresa, id_lote]);
-    res.status(201).json({ updatedlote, msg: 'Lote modificado' });
+    res.status(201).json({ updatedlote, msg: 'Lote actualizado' });
   } catch (err) {
     errorHandler(err, next);
   }
@@ -90,8 +74,11 @@ exports.getLotes = async (req, res, next) => {
       7,
       'No se tienen permisos para manipular el modulo lote'
     );
-
-    const lotes = await db.any(loteQueries.getLotes, [id_empresa]);
+    let filter = '%%';
+    if (req.query.filter) {
+      filter = `%${req.query.filter}%`;
+    }
+    const lotes = await db.any(loteQueries.getLotes, [filter, id_empresa]);
     res.status(200).json({ lotes });
   } catch (err) {
     errorHandler(err, next);

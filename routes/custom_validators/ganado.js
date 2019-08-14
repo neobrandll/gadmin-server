@@ -38,13 +38,6 @@ exports.updateDeRaza = async (deRaza, { req }) => {
   return true;
 };
 
-// exports.estadoGanado = (esGanado, { req }) => {
-//   if (esGanado !== '1' && esGanado !== '2' && esGanado !== '3' && esGanado !== '4') {
-//     throw new Error('El id del estado ingresado es incorrecto');
-//   }
-//   return true;
-// };
-
 exports.tipoGanado = (tipoGanado, { req }) => {
   const esGanado = req.body.idEstadoGanado;
   if (tipoGanado !== '1' && tipoGanado !== '2') {

@@ -110,7 +110,11 @@ exports.getEmployees = async (req, res, next) => {
       5,
       'No se tienen permisos para manejar empleados o cargos'
     );
-    const employees = await db.any(employeeQueries.getEmployees, [id_empresa]);
+    let filter = '%%';
+    if (req.query.filter) {
+      filter = `%${req.query.filter}%`;
+    }
+    const employees = await db.any(employeeQueries.getEmployees, [filter, id_empresa]);
     res.status(200).json({ employees });
   } catch (err) {
     errorHandler(err, next);
@@ -129,8 +133,15 @@ exports.getEmployee = async (req, res, next) => {
       5,
       'No se tienen permisos para manejar empleados o cargos'
     );
-    const employee = await db.many(employeeQueries.getEmployee, [id_empresa, ci_persona]);
-    res.status(200).json({ employee });
+    db.task(async con => {
+      try {
+        const employee = await con.one(employeeQueries.getEmployee, [id_empresa, ci_persona]);
+        const cargos = await con.many(employeeQueries.getCargosEmployee, [id_empresa, ci_persona]);
+        res.status(200).json({ employee, cargos });
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
   } catch (err) {
     errorHandler(err, next);
   }
@@ -198,7 +209,7 @@ exports.updateCargo = async (req, res, next) => {
       'No se tienen permisos para manejar empleados'
     );
     const updatedCargo = await db.one(employeeQueries.updateCargo, [de_cargo, id_cargo]);
-    res.status(200).json({ updatedCargo });
+    res.status(200).json({ updatedCargo, msg: 'cargo actualizado!' });
   } catch (err) {
     errorHandler(err, next);
   }
@@ -215,7 +226,11 @@ exports.getCargosEmpresa = async (req, res, next) => {
       5,
       'No se tienen permisos para manejar empleados'
     );
-    const cargos = await db.manyOrNone(employeeQueries.getCargosEmpresa, [id_empresa]);
+    let filter = '%%';
+    if (req.query.filter) {
+      filter = `%${req.query.filter}%`;
+    }
+    const cargos = await db.manyOrNone(employeeQueries.getCargosEmpresa, [filter, id_empresa]);
     res.status(200).json({ cargos });
   } catch (err) {
     errorHandler(err, next);

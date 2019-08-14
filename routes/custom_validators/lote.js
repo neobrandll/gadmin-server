@@ -21,6 +21,9 @@ exports.deLoteAvailable = async (deLote, { req }) => {
   }
   const deLoteFound = await db.oneOrNone(loteQueries.deLoteAvailable, [deLote, id_empresa]);
   if (deLoteFound) {
+    if (req.body.idLote && +req.body.idLote === deLoteFound.id_lote) {
+      return true;
+    }
     throw new Error('Ya existe un lote con la descripcion ingresada');
   }
   return true;

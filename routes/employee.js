@@ -232,7 +232,7 @@ router.get(
 );
 
 router.put(
-  '/updateCargo',
+  '/cargo',
   isAuth,
   [
     body('idCargo')
@@ -260,7 +260,7 @@ router.put(
 );
 
 router.put(
-  '/updateEmployeeAddress',
+  '/address',
   isAuth,
   [
     body('idEmpresa')
@@ -304,30 +304,6 @@ router.put(
 );
 
 router.get(
-  '/getEmployee/:idEmpresa/:ci',
-  isAuth,
-  [
-    param('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist),
-    param('ci')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Debe de ingresar una cedula')
-      .isInt()
-      .withMessage('La cedula debe de ser un numero entero')
-      .custom(employeeValidators.isEmployee)
-  ],
-  employeeControllers.getEmployee
-);
-
-router.get(
   '/getEmployees/:idEmpresa',
   isAuth,
   [
@@ -344,7 +320,7 @@ router.get(
 );
 
 router.put(
-  '/updateEmployeeProfile',
+  '/profile',
   isAuth,
   [
     body('idEmpresa')
@@ -395,5 +371,29 @@ router.put(
       .withMessage('El numero de telefono no puede estar vacio')
   ],
   employeeControllers.updateEmployeeProfile
+);
+
+router.get(
+  '/:idEmpresa/:ci',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('ci')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Debe de ingresar una cedula')
+      .isInt()
+      .withMessage('La cedula debe de ser un numero entero')
+      .custom(employeeValidators.isEmployee)
+  ],
+  employeeControllers.getEmployee
 );
 module.exports = router;

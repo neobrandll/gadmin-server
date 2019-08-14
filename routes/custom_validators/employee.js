@@ -22,6 +22,9 @@ exports.deCargoExist = async (deCargo, { req }) => {
   }
   const deCargoFound = await db.oneOrNone(employeeQueries.deCargoExist, [deCargo, id_empresa]);
   if (deCargoFound) {
+    if (req.body.idCargo && +req.body.idCargo === deCargoFound.id_cargo) {
+      return true;
+    }
     throw new Error('Ya existe un cargo con la descripcion ingresada');
   }
   return true;

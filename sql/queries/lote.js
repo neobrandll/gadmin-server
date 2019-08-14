@@ -15,7 +15,7 @@ module.exports = {
     'UPDATE lote SET de_lote = $1 WHERE id_empresa = $2 AND id_lote = $3 RETURNING *'
   ),
   deleteLote: new PS('deleteLote', 'DELETE FROM lote WHERE id_lote = $1 AND id_empresa = $2'),
-  getLotes: new PS('getLotes', 'SELECT * FROM lote WHERE id_empresa = $1'),
+  getLotes: new PS('getLotes', 'SELECT * FROM lote WHERE de_lote ILIKE $1 AND id_empresa = $2'),
   addGanadoToLote: new PS(
     'addGanadoToLote',
     'INSERT INTO lote_ganado (id_lote, id_ganado) ' +
