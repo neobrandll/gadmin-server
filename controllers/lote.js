@@ -124,6 +124,3 @@ exports.removeGanadoFromLote = async (req, res, next) => {
     errorHandler(err, next);
   }
 };
-
-//remove y add ganado
-//

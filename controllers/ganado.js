@@ -262,7 +262,7 @@ exports.searchGanado = async (req, res, next) => {
       paramsArr.push(req.query.dateTo);
       pCount++;
     }
-    searchPS += `OFFSET $${pCount} LIMIT $${pCount + 1}`;
+    searchPS += ` OFFSET $${pCount} LIMIT $${pCount + 1}`;
     db.task(async con => {
       try {
         let totalItems = await con.one(new PS('countTotalGanado', countPS), paramsArr);

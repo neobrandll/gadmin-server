@@ -16,6 +16,8 @@ const employeeRoutes = require('./routes/employee');
 const ganadoRoutes = require('./routes/ganado');
 const loteRoutes = require('./routes/lote');
 const potreroRoutes = require('./routes/potrero');
+const pajuelaRoutes = require('./routes/pajuela');
+const itemRoutes = require('./routes/item');
 
 const app = express();
 
@@ -36,6 +38,8 @@ app.use('/employee', employeeRoutes);
 app.use('/ganado', ganadoRoutes);
 app.use('/lote', loteRoutes);
 app.use('/potrero', potreroRoutes);
+app.use('/pajuela', pajuelaRoutes);
+app.use('/item', itemRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);

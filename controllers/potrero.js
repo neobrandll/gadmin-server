@@ -5,22 +5,6 @@ const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
-exports.PLANTILLA = async (req, res, next) => {
-  try {
-    await validationHandler(req);
-    const id_usuario = req.id_usuario;
-    const id_empresa = req.body.idEmpresa;
-    await permissionHandler(
-      id_empresa,
-      id_usuario,
-      8,
-      'No se tienen permisos para manipular el modulo de potrero'
-    );
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
 exports.createPasto = async (req, res, next) => {
   try {
     await validationHandler(req);
@@ -32,7 +16,7 @@ exports.createPasto = async (req, res, next) => {
       8,
       'No se tienen permisos para manipular el modulo de potrero'
     );
-    const de_pasto = req.body.dePasto;
+    const de_pasto = req.body.dePasto.toLowerCase();
     const pasto = await db.one(potreroQueries.createPasto, [de_pasto, id_empresa]);
     res.status(201).json({ pasto, msg: 'tipo de pasto creado' });
   } catch (err) {
@@ -52,7 +36,7 @@ exports.updatePasto = async (req, res, next) => {
       'No se tienen permisos para manipular el modulo de potrero'
     );
     const id_pasto = req.body.idPasto;
-    const de_pasto = req.body.dePasto;
+    const de_pasto = req.body.dePasto.toLowerCase();
     const updatedPasto = await db.one(potreroQueries.updatePasto, [de_pasto, id_pasto, id_empresa]);
     res.status(200).json({ updatedPasto, msg: 'tipo de pasto actualizado!' });
   } catch (err) {
@@ -93,7 +77,7 @@ exports.createPotrero = async (req, res, next) => {
       8,
       'No se tienen permisos para manipular el modulo de potrero'
     );
-    const de_potrero = req.body.dePotrero;
+    const de_potrero = req.body.dePotrero.toLowerCase();
     const id_pasto = req.body.idPasto;
     const potrero = await db.one(potreroQueries.createPotrero, [de_potrero, id_pasto]);
     res.status(201).json({ potrero, msg: 'potrero creado' });
@@ -114,7 +98,7 @@ exports.updatePotrero = async (req, res, next) => {
       'No se tienen permisos para manipular el modulo de potrero'
     );
     const id_potrero = req.body.idPotrero;
-    const de_potrero = req.body.dePotrero;
+    const de_potrero = req.body.dePotrero.toLowerCase();
     const id_pasto = req.body.idPasto;
     const updatedPotrero = await db.one(potreroQueries.updatePotrero, [
       de_potrero,
@@ -176,5 +160,3 @@ exports.deletePotrero = async (req, res, next) => {
     errorHandler(err, next);
   }
 };
-
-//crud potrero
