@@ -154,6 +154,7 @@ exports.coGanadoExist = async (codigo, { req }) => {
   }
   //aqui adjunto la direccion de la foto para eliminarla si se actualiza;
   req.fo_ganado = ganadoFound.fo_ganado;
+  req.id_ganado = ganadoFound.id_ganado;
   return true;
 };
 

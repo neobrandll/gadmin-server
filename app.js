@@ -18,6 +18,7 @@ const loteRoutes = require('./routes/lote');
 const potreroRoutes = require('./routes/potrero');
 const pajuelaRoutes = require('./routes/pajuela');
 const itemRoutes = require('./routes/item');
+const produccionRoutes = require('./routes/produccion');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/lote', loteRoutes);
 app.use('/potrero', potreroRoutes);
 app.use('/pajuela', pajuelaRoutes);
 app.use('/item', itemRoutes);
+app.use('/produccion', produccionRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
