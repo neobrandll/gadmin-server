@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 const isAuth = require('../middlewares/is-auth');
 const produccionControllers = require('../controllers/produccion');
@@ -194,4 +194,187 @@ router.put(
   produccionControllers.updateProduccion
 );
 
+router.delete(
+  '/:idEmpresa/:idProduccion',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('idProduccion')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la produccion')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(produccionValidators.exist)
+  ],
+  produccionControllers.delete
+);
+
+router.get(
+  '/pesaje/:idEmpresa',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    query('idTipoProduccion')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del tipo de produccion')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .isIn(['4', '5'])
+      .withMessage('El id del tipo de produccion es incorrecto'),
+    query('dateFrom')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('dateTo')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('coGanado')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coGanadoExist)
+  ],
+  produccionControllers.getPesaje
+);
+
+router.get(
+  '/pesajeCount/:idEmpresa',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    query('idTipoProduccion')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del tipo de produccion')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .isIn(['4', '5'])
+      .withMessage('El id del tipo de produccion es incorrecto'),
+    query('dateFrom')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('dateTo')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('coGanado')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coGanadoExist)
+  ],
+  produccionControllers.getPesajeCount
+);
+
+router.get(
+  '/count/:idEmpresa/:producto',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    query('idTipoProduccion')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del tipo de produccion')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .isIn(['1', '2', '3'])
+      .withMessage('El id del tipo de produccion es incorrecto'),
+    query('dateFrom')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('dateTo')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    param('producto')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('el campo producto no puede estar vacio')
+      .isIn(['leche', 'queso'])
+      .withMessage('valor invalido')
+  ],
+  produccionControllers.getProduccionTotal
+);
+
+router.get(
+  '/:idEmpresa/:producto',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    query('idTipoProduccion')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del tipo de produccion')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .isIn(['1', '2', '3'])
+      .withMessage('El id del tipo de produccion es incorrecto'),
+    query('dateFrom')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('dateTo')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    param('producto')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('el campo producto no puede estar vacio')
+      .isIn(['leche', 'queso'])
+      .withMessage('valor invalido')
+  ],
+  produccionControllers.getProduccion
+);
 module.exports = router;

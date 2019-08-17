@@ -1,5 +1,3 @@
-const PS = require('pg-promise').PreparedStatement;
-
 const db = require('../sql/db.js');
 const pajuelaQueries = require('../sql/queries/pajuela');
 
@@ -141,13 +139,9 @@ exports.getPajuelas = async (req, res, next) => {
     searchPS += ` OFFSET $${pCount} LIMIT $${pCount + 1}`;
     db.task(async con => {
       try {
-        let totalItems = await con.one(new PS('countTotalPajuela', countPS), paramsArr);
+        let totalItems = await con.one(countPS, paramsArr);
         totalItems = totalItems.count;
-        const rs = await con.any(new PS('searchPajuelaBy', searchPS), [
-          ...paramsArr,
-          offset,
-          ITEMS_PER_PAGE
-        ]);
+        const rs = await con.any(searchPS, [...paramsArr, offset, ITEMS_PER_PAGE]);
         res.status(200).json({
           rs,
           currentPage: page,

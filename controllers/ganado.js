@@ -2,7 +2,6 @@ const fs = require('fs');
 
 const db = require('../sql/db.js');
 const ganadoQueries = require('../sql/queries/ganado');
-const PS = require('pg-promise').PreparedStatement;
 
 const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
@@ -265,13 +264,9 @@ exports.searchGanado = async (req, res, next) => {
     searchPS += ` OFFSET $${pCount} LIMIT $${pCount + 1}`;
     db.task(async con => {
       try {
-        let totalItems = await con.one(new PS('countTotalGanado', countPS), paramsArr);
+        let totalItems = await con.one(countPS, paramsArr);
         totalItems = totalItems.count;
-        const rs = await con.any(new PS('searchGanadoBy', searchPS), [
-          ...paramsArr,
-          offset,
-          ITEMS_PER_PAGE
-        ]);
+        const rs = await con.any(searchPS, [...paramsArr, offset, ITEMS_PER_PAGE]);
         res.status(200).json({
           rs,
           currentPage: page,

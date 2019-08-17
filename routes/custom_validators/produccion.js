@@ -20,7 +20,7 @@ exports.produccionDateAvailable = async (feProduccion, { req }) => {
 
 exports.pesajeDateAvailable = async (feProduccion, { req }) => {
   const id_empresa = req.body.idEmpresa;
-  const co_ganado = req.body.conGanado;
+  const co_ganado = req.body.coGanado;
   const id_tipo_produccion = req.body.idTipoProduccion;
   const produccionFound = await db.oneOrNone(produccionQueries.pesajeDateAvailable, [
     feProduccion,
@@ -28,6 +28,7 @@ exports.pesajeDateAvailable = async (feProduccion, { req }) => {
     id_empresa,
     co_ganado
   ]);
+  console.log(feProduccion, id_tipo_produccion, id_empresa, co_ganado);
   if (produccionFound) {
     if (req.body.idProduccion && produccionFound.id_produccion === +req.body.idProduccion) {
       return true;
@@ -78,5 +79,20 @@ exports.pesajeExist = async (idProduccion, { req }) => {
     }
   }
   req.pesaje = produccionFound;
+  return true;
+};
+
+exports.exist = async (idProduccion, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const produccionFound = await db.oneOrNone(produccionQueries.produccionExist, [
+    idProduccion,
+    id_empresa
+  ]);
+  if (!produccionFound) {
+    throw new Error('No existe ningun pesaje con el id ingresado en la empresa');
+  }
   return true;
 };

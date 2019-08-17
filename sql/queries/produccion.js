@@ -34,5 +34,9 @@ module.exports = {
   removeGanadoFromPesaje: new PS(
     'removeGanadoFromPesaje',
     'DELETE FROM produccion_ganado WHERE id_produccion = $1 AND id_ganado = $2'
+  ),
+  deleteProduccion: new PS(
+    'deleteProduccion',
+    'DELETE FROM produccion WHERE id_produccion =$1 AND id_empresa = $2'
   )
 };
