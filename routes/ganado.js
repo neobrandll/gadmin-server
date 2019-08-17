@@ -162,15 +162,7 @@ router.post(
       .withMessage('Por favor ingrese el codigo del ganado')
       .isInt()
       .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coGanadoAvailable),
-    body('newCoGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el codigo del ganado')
-      .isInt()
-      .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.newCoGanado)
+      .custom(ganadoValidators.coGanadoAvailable)
   ],
   ganadoControllers.createGanado
 );
@@ -325,7 +317,15 @@ router.put(
       .withMessage('Por favor ingrese el codigo del ganado')
       .isInt()
       .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coGanadoExist)
+      .custom(ganadoValidators.coGanadoExist),
+    body('newCoGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el nuevo codigo del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.newCoGanado)
   ],
   ganadoControllers.updateGanado
 );

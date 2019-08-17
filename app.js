@@ -9,6 +9,7 @@ if (result.error) {
 }
 const multer = require('multer');
 const { port } = require('./config.js');
+
 const authRoutes = require('./routes/auth');
 const empresaRoutes = require('./routes/empresa.js');
 const adminRoutes = require('./routes/admin');
@@ -19,6 +20,7 @@ const potreroRoutes = require('./routes/potrero');
 const pajuelaRoutes = require('./routes/pajuela');
 const itemRoutes = require('./routes/item');
 const produccionRoutes = require('./routes/produccion');
+const actividadRoutes = require('./routes/actividad');
 
 const app = express();
 
@@ -42,6 +44,7 @@ app.use('/potrero', potreroRoutes);
 app.use('/pajuela', pajuelaRoutes);
 app.use('/item', itemRoutes);
 app.use('/produccion', produccionRoutes);
+app.use('/actividad', actividadRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);

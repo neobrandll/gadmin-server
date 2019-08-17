@@ -88,9 +88,9 @@ exports.createGanado = async (req, res, next) => {
       id_tipoGanado = req.body.tipoGanado,
       peGanado = req.body.peGanado,
       feGanado = req.body.feGanado,
-      co_paGanado = req.body.coPaGanado,
-      co_maGanado = req.body.coMaGanado,
-      co_paPajuela = req.body.coPaPajuela,
+      id_paGanado = req.id_pa_ganado,
+      id_maGanado = req.id_ma_ganado,
+      id_paPajuela = req.id_pa_pajuela,
       co_ganado = req.body.coGanado;
     let id_raza;
     if (req.id_mestizo) {
@@ -109,9 +109,9 @@ exports.createGanado = async (req, res, next) => {
       id_tipoGanado,
       peGanado,
       feGanado,
-      co_paGanado,
-      co_maGanado,
-      co_paPajuela,
+      id_paGanado,
+      id_maGanado,
+      id_paPajuela,
       co_ganado,
       fotoGanado
     ]);
@@ -139,9 +139,9 @@ exports.updateGanado = async (req, res, next) => {
       id_tipoGanado = req.body.tipoGanado,
       peGanado = req.body.peGanado,
       feGanado = req.body.feGanado,
-      co_paGanado = req.body.coPaGanado,
-      co_maGanado = req.body.coMaGanado,
-      co_paPajuela = req.body.coPaPajuela,
+      id_paGanado = req.id_pa_ganado,
+      id_maGanado = req.id_ma_ganado,
+      id_paPajuela = req.id_pa_pajuela,
       co_ganado = req.body.coGanado,
       newCoGanado = req.body.newCoGanado;
 
@@ -161,9 +161,9 @@ exports.updateGanado = async (req, res, next) => {
       id_tipoGanado,
       peGanado,
       feGanado,
-      co_paGanado,
-      co_maGanado,
-      co_paPajuela,
+      id_paGanado,
+      id_maGanado,
+      id_paPajuela,
       fotoGanado,
       newCoGanado,
       co_ganado,

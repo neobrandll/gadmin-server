@@ -74,7 +74,12 @@ exports.razaExistOrMestizo = async (id_raza, { req }) => {
 
 exports.coPaGanado = async (codigo, { req }) => {
   if (codigo === '-1') {
+    req.id_pa_ganado = -1;
     return true;
+  } else {
+    if (req.body.coPaPajuela && req.body.coPaPajuela !== '-1') {
+      throw new Error('el ganado solo puede tener un padre, ganado o pajuela');
+    }
   }
   let id_empresa = req.body.idEmpresa;
   if (!id_empresa) {
@@ -91,11 +96,13 @@ exports.coPaGanado = async (codigo, { req }) => {
   if (ganadoFound.id_tipo_ganado !== 1) {
     throw new Error('El padre debe de ser macho!');
   }
+  req.id_pa_ganado = ganadoFound.id_ganado;
   return true;
 };
 
 exports.coMaGanado = async (codigo, { req }) => {
   if (codigo === '-1') {
+    req.id_ma_ganado = -1;
     return true;
   }
   let id_empresa = req.body.idEmpresa;
@@ -113,12 +120,18 @@ exports.coMaGanado = async (codigo, { req }) => {
   if (ganadoFound.id_tipo_ganado !== 2) {
     throw new Error('La madre debe de ser hembra');
   }
+  req.id_ma_ganado = ganadoFound.id_ganado;
   return true;
 };
 
 exports.coPajuela = async (codigo, { req }) => {
   if (codigo === '-1') {
+    req.id_pa_pajuela = -1;
     return true;
+  } else {
+    if (req.body.coPaGanado && req.body.coPaGanado !== '-1') {
+      throw new Error('el ganado solo puede tener un padre, ganado o pajuela');
+    }
   }
   let id_empresa = req.body.idEmpresa;
   if (!id_empresa) {
@@ -128,6 +141,7 @@ exports.coPajuela = async (codigo, { req }) => {
   if (!pajuelaFound) {
     throw new Error('no existe ninguna pajuela con el codigo ingresado en la empresa');
   }
+  req.id_pa_pajuela = pajuelaFound.id_pajuela;
   return true;
 };
 
