@@ -21,11 +21,11 @@ module.exports = {
   ),
   pajuelaExist: new PS(
     'pajuelaExist',
-    'SELECT id_pajuela FROM pajuela WHERE co_pajuela = $1 AND id_empresa = $2'
+    'SELECT id_pajuela, id_raza FROM pajuela WHERE co_pajuela = $1 AND id_empresa = $2'
   ),
   codigoExist: new PS(
     'codigoExist',
-    'SELECT id_ganado, fo_ganado, id_tipo_ganado FROM ganado WHERE co_ganado = $1 AND id_empresa = $2'
+    'SELECT id_ganado, fo_ganado, id_tipo_ganado, id_raza FROM ganado WHERE co_ganado = $1 AND id_empresa = $2'
   ),
   createGanado: new PS(
     'createGanado',

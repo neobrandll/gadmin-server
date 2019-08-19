@@ -83,90 +83,6 @@ router.put(
   ganadoControllers.updateRaza
 );
 
-router.post(
-  '/createGanado',
-  isAuth,
-  upload.single('foGanado'),
-  [
-    body('idEmpresa')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la empresa')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(empresaValidators.empresaExist),
-    body('idRaza')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id de la raza')
-      .custom(ganadoValidators.razaExistOrMestizo),
-    body('idEstadoGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id del estado del ganado')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .isIn(['1', '2', '3', '4'])
-      .withMessage('El id del estado ingresado es incorrecto'),
-    body('tipoGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el id del tipo del ganado')
-      .isInt()
-      .withMessage('El id debe de ser un numero entero')
-      .custom(ganadoValidators.tipoGanado),
-    body('peGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el peso del ganado')
-      .isNumeric()
-      .withMessage('El peso debe de ser numerico'),
-    body('feGanado')
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese la fecha de nacimiento del ganado')
-      .custom(sharedValidator.dateValidator),
-    body('coPaGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el codigo del padre del ganado')
-      .isInt()
-      .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coPaGanado),
-    body('coMaGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el codigo de la madre del ganado')
-      .isInt()
-      .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coMaGanado),
-    body('coPaPajuela')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el codigo de la pajuela')
-      .isInt()
-      .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coPajuela),
-    body('coGanado')
-      .trim()
-      .not()
-      .isEmpty()
-      .withMessage('Por favor ingrese el codigo del ganado')
-      .isInt()
-      .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coGanadoAvailable)
-  ],
-  ganadoControllers.createGanado
-);
-
 router.get(
   '/search/:idEmpresa',
   isAuth,
@@ -279,7 +195,7 @@ router.put(
       .not()
       .isEmpty()
       .withMessage('Por favor ingrese el peso del ganado')
-      .isNumeric()
+      .isFloat()
       .withMessage('El peso debe de ser numerico'),
     body('feGanado')
       .not()
@@ -328,5 +244,89 @@ router.put(
       .custom(ganadoValidators.newCoGanado)
   ],
   ganadoControllers.updateGanado
+);
+
+router.post(
+  '',
+  isAuth,
+  upload.single('foGanado'),
+  [
+    body('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    body('idRaza')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la raza')
+      .custom(ganadoValidators.razaExistOrMestizo),
+    body('idEstadoGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del estado del ganado')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .isIn(['1', '2', '3', '4'])
+      .withMessage('El id del estado ingresado es incorrecto'),
+    body('tipoGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del tipo del ganado')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(ganadoValidators.tipoGanado),
+    body('peGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el peso del ganado')
+      .isFloat()
+      .withMessage('El peso debe de ser numerico'),
+    body('feGanado')
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese la fecha de nacimiento del ganado')
+      .custom(sharedValidator.dateValidator),
+    body('coPaGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo del padre del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coPaGanado),
+    body('coMaGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo de la madre del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coMaGanado),
+    body('coPaPajuela')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo de la pajuela')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coPajuela),
+    body('coGanado')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo del ganado')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(ganadoValidators.coGanadoAvailable)
+  ],
+  ganadoControllers.createGanado
 );
 module.exports = router;

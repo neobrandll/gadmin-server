@@ -111,7 +111,7 @@ exports.coMaGanado = async (codigo, { req }) => {
   }
   const codigoGanado = req.body.coGanado;
   if (codigoGanado === codigo) {
-    throw new Error('El codigo del padre no puede ser el mismo que el del ganado');
+    throw new Error('El codigo de la madre no puede ser el mismo que el del ganado');
   }
   const ganadoFound = await db.oneOrNone(ganadoQueries.codigoExist, [codigo, id_empresa]);
   if (!ganadoFound) {

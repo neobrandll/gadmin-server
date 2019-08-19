@@ -158,21 +158,27 @@ exports.addPermissionToProfile = async (req, res, next) => {
       'No se tienen permisos para manejar permisologia y perfiles de la empresa'
     );
     let idFound;
-    for (const id_permission of id_permissionsArr) {
-      idFound = await db.oneOrNone(adminQueries.permissionProfileExist, [
-        id_permission,
-        id_profile
-      ]);
-      if (idFound) {
-        const err = new Error(`El perfil ya contiene el permiso con el id: ${id_permission} `);
-        err.statusCode = 422;
-        throw err;
+    db.task(async con => {
+      try {
+        for (const id_permission of id_permissionsArr) {
+          idFound = await con.oneOrNone(adminQueries.permissionProfileExist, [
+            id_permission,
+            id_profile
+          ]);
+          if (idFound) {
+            const err = new Error(`El perfil ya contiene el permiso con el id: ${id_permission} `);
+            err.statusCode = 422;
+            throw err;
+          }
+        }
+        for (const id of id_permissionsArr) {
+          await con.none(adminQueries.addPermissionToProfile, [id, id_profile]);
+        }
+        res.status(201).json({ msg: 'permisos agregados!' });
+      } catch (err) {
+        errorHandler(err, next);
       }
-    }
-    for (const id of id_permissionsArr) {
-      await db.none(adminQueries.addPermissionToProfile, [id, id_profile]);
-    }
-    res.status(201).json({ msg: 'permisos agregados!' });
+    });
   } catch (err) {
     errorHandler(err, next);
   }

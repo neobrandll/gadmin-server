@@ -33,7 +33,11 @@ exports.perfilExist = async (id_perfil, { req }) => {
 
 exports.checkPermissionsIds = async (arr, { req }) => {
   let idFound;
+  const idArr = [];
   for (const id of arr) {
+    if (idArr.includes(id)) {
+      throw new Error('esta repitiendo un id de un permiso');
+    }
     if (!Number.isInteger(id)) {
       throw new Error('los ids deben de ser numeros enteros');
     }
@@ -41,6 +45,7 @@ exports.checkPermissionsIds = async (arr, { req }) => {
     if (!idFound) {
       throw new Error('Uno o mas de los ids ingresados son invalidos');
     }
+    idArr.push(id);
   }
   return true;
 };
