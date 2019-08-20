@@ -36,7 +36,7 @@ exports.coPaGanado = async (codigo, { req }) => {
 };
 
 exports.coPajuela = async (codigo, { req }) => {
-  if (req.body.coPaGanado) {
+  if (req.body.coPaGanado || req.query.coPaGanado) {
     throw new Error('el ganado solo puede tener un padre, toro o pajuela');
   }
   let id_empresa = req.body.idEmpresa;
@@ -97,11 +97,31 @@ exports.idTipoParto = async (id, { req }) => {
   if (!id_empresa) {
     id_empresa = req.params.idEmpresa;
   }
-  if (id === '1' && req.body.coPaPajuela) {
+  let coPaPajuela = req.body.coPaPajuela;
+  if (!coPaPajuela) {
+    coPaPajuela = req.query.coPaPajuela;
+  }
+  let coPaGanado = req.body.coPaGanado;
+  if (!coPaGanado) {
+    coPaGanado = req.query.coPaGanado;
+  }
+  if (id === '1' && coPaPajuela) {
     throw new Error('el tipo de id es parto natural y se ingreso una pajuela');
   }
-  if (id === '2' && req.body.coPaGanado) {
+  if (id === '2' && coPaGanado) {
     throw new Error('el tipo de id es parto pajuela y se ingreso el codigo de un toro');
+  }
+  return true;
+};
+
+exports.partoExist = async (idActividad, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const PartoFound = await db.oneOrNone(actividadQueries.partoExist, [idActividad, id_empresa]);
+  if (!PartoFound) {
+    throw new Error('no existe un parto con el id ingresado en la empresa');
   }
   return true;
 };

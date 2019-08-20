@@ -88,9 +88,9 @@ exports.createGanado = async (req, res, next) => {
       id_tipoGanado = req.body.tipoGanado,
       peGanado = req.body.peGanado,
       feGanado = req.body.feGanado,
-      id_paGanado = req.id_pa_ganado,
-      id_maGanado = req.id_ma_ganado,
-      id_paPajuela = req.id_pa_pajuela,
+      id_paGanado = -1,
+      id_maGanado = -1,
+      id_paPajuela = -1,
       co_ganado = req.body.coGanado;
     let id_raza;
     if (req.id_mestizo) {
@@ -139,9 +139,9 @@ exports.updateGanado = async (req, res, next) => {
       id_tipoGanado = req.body.tipoGanado,
       peGanado = req.body.peGanado,
       feGanado = req.body.feGanado,
-      id_paGanado = req.id_pa_ganado,
-      id_maGanado = req.id_ma_ganado,
-      id_paPajuela = req.id_pa_pajuela,
+      id_paGanado = -1,
+      id_maGanado = -1,
+      id_paPajuela = -1,
       co_ganado = req.body.coGanado,
       newCoGanado = req.body.newCoGanado;
 
