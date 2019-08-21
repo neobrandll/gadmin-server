@@ -742,7 +742,7 @@ exports.updateServicio = async (req, res, next) => {
           res.status(200).json({
             updatedActividad,
             co_vaca: req.body.coVaca,
-            co_toro: req.body.co_toro,
+            co_toro: req.body.coToro,
             msg: 'servicio actualizado'
           });
         } else {
@@ -793,6 +793,160 @@ exports.getServicio = async (req, res, next) => {
       ]);
     }
     res.status(200).json({ servicio });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.deleteServicio = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      14,
+      'No se tienen permisos para manipular el modulo servicios'
+    );
+    const actividad = req.actividad;
+    await db.none(actividadQueries.deleteServicio, [actividad.id_actividad]);
+    res.status(200).json({ msg: 'servicio eliminado' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.deleteOtros = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      13,
+      'No se tienen permisos para manipular el modulo de otras actividades'
+    );
+    const id_actividad = req.params.idActividad;
+    await db.none(actividadQueries.deleteOtros, [id_actividad]);
+    res.status(200).json({ msg: 'actividad eliminada' });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getServicios = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      14,
+      'No se tienen permisos para manipular el modulo servicios'
+    );
+    const page = +req.query.page || 1;
+    const offset = (page - 1) * ITEMS_PER_PAGE;
+    let countPS =
+      'SELECT COUNT(actividad.id_actividad) FROM actividad ' +
+      'LEFT JOIN actividad_ganado pp ON actividad.id_actividad = pp.id_actividad ' +
+      'LEFT JOIN actividad_ganado sp ON PP.id_actividad = sp.id_actividad ' +
+      'LEFT JOIN ganado toro ON pp.id_ganado = toro.id_ganado LEFT JOIN ganado vaca ON sp.id_ganado = vaca.id_ganado ' +
+      'LEFT JOIN actividad_pajuela ON actividad.id_actividad = actividad_pajuela.id_actividad ' +
+      'LEFT JOIN pajuela ON actividad_pajuela.id_pajuela = pajuela.id_pajuela ' +
+      'LEFT JOIN ganado vp ON actividad_pajuela.id_ganado = vp.id_ganado ';
+    // 'WHERE (toro.id_tipo_ganado = 1 AND vaca.id_tipo_ganado = 2 AND id_tipo_actividad = 6 AND vaca.id_empresa = 1) ' +
+    // 'OR (id_tipo_actividad = 7 AND pajuela.id_empresa = 1)';
+    let searchPS =
+      ' SELECT id_tipo_actividad, actividad.id_actividad,actividad.de_actividad, actividad.fe_actividad ,' +
+      ' toro.id_ganado id_toro, toro.co_ganado co_toro , vaca.id_ganado id_vaca, vaca.co_ganado co_vaca , ' +
+      'pajuela.id_pajuela, co_pajuela, vp.id_ganado vp_id_ganado, vp.co_ganado vp_co_ganado ' +
+      'FROM actividad LEFT JOIN actividad_ganado pp ON actividad.id_actividad = pp.id_actividad ' +
+      'LEFT JOIN actividad_ganado sp ON PP.id_actividad = sp.id_actividad ' +
+      'LEFT JOIN ganado toro ON pp.id_ganado = toro.id_ganado ' +
+      'LEFT JOIN ganado vaca ON sp.id_ganado = vaca.id_ganado ' +
+      'LEFT JOIN actividad_pajuela ON actividad.id_actividad = actividad_pajuela.id_actividad ' +
+      'LEFT JOIN pajuela ON actividad_pajuela.id_pajuela = pajuela.id_pajuela ' +
+      'LEFT JOIN ganado vp ON actividad_pajuela.id_ganado = vp.id_ganado ';
+    // 'WHERE (toro.id_tipo_ganado = 1 AND vaca.id_tipo_ganado = 2 AND id_tipo_actividad = 6 AND vaca.id_empresa = 1) ' +
+    // 'OR (id_tipo_actividad = 7 AND pajuela.id_empresa = 1) ' +
+    // 'GROUP BY actividad.id_actividad, toro.id_ganado, vaca.id_ganado, vp.id_ganado, pajuela.id_pajuela ';
+    let ganadoConditions =
+      'WHERE (toro.id_tipo_ganado = 1 AND vaca.id_tipo_ganado = 2 AND id_tipo_actividad = 6 AND vaca.id_empresa = $1';
+    let pajuelaConditions = 'OR (id_tipo_actividad = 7 AND pajuela.id_empresa = $1';
+    let pCount = 2;
+    const paramsArr = [id_empresa];
+    if (req.query.filter) {
+      const filter = `%${req.query.filter}%`;
+      ganadoConditions += ` AND actividad.de_actividad ILIKE $${pCount}`;
+      pajuelaConditions += ` AND actividad.de_actividad ILIKE $${pCount}`;
+      paramsArr.push(filter);
+      pCount++;
+    }
+    if (req.query.idTipoActividad) {
+      ganadoConditions += ` AND actividad.id_tipo_actividad = $${pCount}`;
+      pajuelaConditions += ` AND actividad.id_tipo_actividad= $${pCount}`;
+      paramsArr.push(req.query.idTipoActividad);
+      pCount++;
+    }
+    if (req.id_pajuela) {
+      ganadoConditions += ` AND pajuela.id_pajuela = $${pCount}`;
+      pajuelaConditions += ` AND pajuela.id_pajuela = $${pCount}`;
+      paramsArr.push(req.id_pajuela);
+      pCount++;
+    }
+    if (req.id_toro) {
+      ganadoConditions += ` AND  toro.id_ganado = $${pCount}`;
+      pajuelaConditions += ` AND toro.id_ganado = $${pCount}`;
+      paramsArr.push(req.id_toro);
+      pCount++;
+    }
+    if (req.id_vaca) {
+      ganadoConditions += ` AND vaca.id_ganado = $${pCount}`;
+      pajuelaConditions += ` AND vp.id_ganado = $${pCount}`;
+      paramsArr.push(req.id_vaca);
+      pCount++;
+    }
+    if (req.query.dateFrom) {
+      ganadoConditions += ` AND actividad.fe_actividad >= $${pCount}`;
+      pajuelaConditions += ` AND actividad.fe_actividad >= $${pCount}`;
+      paramsArr.push(req.query.dateFrom);
+      pCount++;
+    }
+    if (req.query.dateTo) {
+      ganadoConditions += ` AND actividad.fe_actividad <= $${pCount}`;
+      pajuelaConditions += ` AND actividad.fe_actividad <= $${pCount}`;
+      paramsArr.push(req.query.dateTo);
+      pCount++;
+    }
+    ganadoConditions += ')';
+    pajuelaConditions += ')';
+    searchPS += ganadoConditions + pajuelaConditions;
+    countPS += ganadoConditions + pajuelaConditions;
+    searchPS +=
+      'GROUP BY actividad.id_actividad, toro.id_ganado, vaca.id_ganado, vp.id_ganado, pajuela.id_pajuela ';
+    searchPS += ` OFFSET $${pCount} LIMIT $${pCount + 1}`;
+    db.task(async con => {
+      try {
+        let totalItems = await con.one(countPS, paramsArr);
+        totalItems = totalItems.count;
+        const rs = await con.any(searchPS, [...paramsArr, offset, ITEMS_PER_PAGE]);
+        res.status(200).json({
+          rs,
+          currentPage: page,
+          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+          hasPreviousPage: page > 1,
+          nextPage: page + 1,
+          previousPage: page - 1,
+          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+          totalItems
+        });
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
   } catch (err) {
     errorHandler(err, next);
   }

@@ -123,5 +123,13 @@ module.exports = {
       ' INNER JOIN pajuela USING(id_pajuela) ' +
       'INNER JOIN ganado USING(id_ganado) ' +
       'WHERE actividad.id_actividad = $1 AND pajuela.id_empresa = $2'
+  ),
+  deleteServicio: new PS(
+    'deleteServicio',
+    'DELETE FROM actividad WHERE id_tipo_actividad IN (6,7) AND id_actividad = $1'
+  ),
+  deleteOtros: new PS(
+    'deleteOtros',
+    'DELETE FROM actividad WHERE id_tipo_actividad IN (3,5) AND id_actividad = $1'
   )
 };

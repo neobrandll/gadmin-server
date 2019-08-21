@@ -516,4 +516,109 @@ router.get(
   actividadControllers.getServicio
 );
 
+router.delete(
+  '/servicio/:idEmpresa/:idActividad',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('idActividad')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id del servicio')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(actividadValidators.servicioExists)
+  ],
+  actividadControllers.deleteServicio
+);
+
+router.delete(
+  '/otros/:idEmpresa/:idActividad',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('idActividad')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la actividad')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(actividadValidators.updateOtrosIdActividad)
+  ],
+  actividadControllers.deleteOtros
+);
+
+router.get(
+  '/servicios/:idEmpresa',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    query('dateFrom')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('dateTo')
+      .optional()
+      .custom(sharedValidators.dateValidator),
+    query('coVaca')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo de la vaca')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(actividadValidators.validateCoVacaServicio),
+    query('coToro')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('El codigo del toro esta vacio')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(actividadValidators.validateCoToroServicio),
+    query('coPajuela')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo de la pajuela')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(actividadValidators.validateCoPajuelaServicio),
+    query('idTipoActividad')
+      .optional()
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('El id del tipo de la actividad esta vacio')
+      .isIn(['6', '7'])
+      .withMessage('El id de la actividad ingresado es incorrecto')
+  ],
+  actividadControllers.getServicios
+);
+
 module.exports = router;
