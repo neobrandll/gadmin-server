@@ -1,6 +1,8 @@
 const db = require('../sql/db.js');
 const actividadQueries = require('../sql/queries/actividad');
 const ganadoQueries = require('../sql/queries/ganado');
+const { body, param, query } = require('express-validator');
+const actividadValidators = require('../routes/custom_validators/actividad');
 
 const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
@@ -363,6 +365,434 @@ exports.getParto = async (req, res, next) => {
     const id_actividad = req.params.idActividad;
     const parto = await db.many(actividadQueries.getParto, [id_empresa, id_actividad]);
     res.status(200).json({ parto });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.postOtros = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      13,
+      'No se tienen permisos para manipular el modulo de otras actividades'
+    );
+    const id_tipo_actividad = req.body.idTipoActividad;
+    const de_actividad = req.body.deActividad;
+    const fe_actividad = req.body.feActividad;
+    db.task(async con => {
+      try {
+        const actividad = await con.one(actividadQueries.createActividad, [
+          id_tipo_actividad,
+          de_actividad,
+          fe_actividad
+        ]);
+        if (+id_tipo_actividad === 3) {
+          await con.none(actividadQueries.abortoActividadGanado, [
+            actividad.id_actividad,
+            req.id_ganado
+          ]);
+          res.status(201).json({ actividad, idGanadoAborto: req.id_ganado });
+        }
+        if (+id_tipo_actividad === 5) {
+          const idGanadoArr = req.idGanadoArr;
+          let tratamientoAGQuery = 'INSERT INTO actividad_ganado (id_actividad, id_ganado) VALUES';
+          const tratamientoAGParams = [actividad.id_actividad];
+          let pCount = 2;
+          for (const id_ganado of idGanadoArr) {
+            tratamientoAGQuery += `($1,$${pCount}),`;
+            pCount++;
+            tratamientoAGParams.push(id_ganado);
+          }
+          tratamientoAGQuery = tratamientoAGQuery.substring(0, tratamientoAGQuery.length - 1);
+          await con.none(tratamientoAGQuery, tratamientoAGParams);
+          res.status(201).json({ actividad, idGanadoArr });
+        }
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.updateOtros = async (req, res, next) => {
+  try {
+    await body('idActividad')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la actividad')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(actividadValidators.updateOtrosIdActividad)
+      .run(req);
+    await body('ganado')
+      .custom(actividadValidators.updateOtrosIdGanadoArr)
+      .run(req);
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      13,
+      'No se tienen permisos para manipular el modulo de otras actividades'
+    );
+    const id_actividad = req.body.idActividad;
+    const id_tipo_actividad = req.actividad.id_tipo_actividad;
+    const de_actividad = req.body.deActividad;
+    const fe_actividad = req.body.feActividad;
+    db.task(async con => {
+      try {
+        const updatedActividad = await con.one(actividadQueries.updateActividadOtros, [
+          de_actividad,
+          fe_actividad,
+          id_actividad
+        ]);
+        if (id_tipo_actividad === 3) {
+          if (req.id_ganado && req.id_ganado !== req.actividad.id_ganado) {
+            await con.none(actividadQueries.updateAbortoActividadGanado, [
+              req.id_ganado,
+              updatedActividad.id_actividad
+            ]);
+            res.status(200).json({ updatedActividad, idGanadoAborto: req.id_ganado });
+          } else {
+            res.status(200).json({ updatedActividad, idGanadoAborto: req.actividad.id_ganado });
+          }
+        }
+        if (id_tipo_actividad === 5) {
+          const idGanadoArr = req.idGanadoArr;
+          await con.none(actividadQueries.deleteOldAGTratamiento, [updatedActividad.id_actividad]);
+          let tratamientoAGQuery = 'INSERT INTO actividad_ganado (id_actividad, id_ganado) VALUES';
+          const tratamientoAGParams = [updatedActividad.id_actividad];
+          let pCount = 2;
+          for (const id_ganado of idGanadoArr) {
+            tratamientoAGQuery += `($1,$${pCount}),`;
+            pCount++;
+            tratamientoAGParams.push(id_ganado);
+          }
+          tratamientoAGQuery = tratamientoAGQuery.substring(0, tratamientoAGQuery.length - 1);
+          await con.none(tratamientoAGQuery, tratamientoAGParams);
+          res.status(200).json({ updatedActividad, idGanadoArr });
+        }
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getAbortos = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      13,
+      'No se tienen permisos para manipular el modulo de otras actividades'
+    );
+    const page = +req.query.page || 1;
+    const offset = (page - 1) * ITEMS_PER_PAGE;
+    let countPS =
+      'SELECT COUNT(actividad.id_actividad) FROM actividad ' +
+      'INNER JOIN actividad_ganado USING(id_actividad) ' +
+      'INNER JOIN ganado USING(id_ganado) WHERE id_tipo_actividad = 3 ' +
+      'AND id_empresa = $1';
+    let searchPS =
+      'SELECT actividad.*, id_ganado, co_ganado ' +
+      'FROM actividad INNER JOIN actividad_ganado USING(id_actividad) ' +
+      'INNER JOIN ganado USING(id_ganado) ' +
+      'WHERE id_tipo_actividad = 3 AND id_empresa = $1';
+    let pCount = 2;
+    const paramsArr = [id_empresa];
+    if (req.query.filter) {
+      const filter = `%${req.query.filter}%`;
+      searchPS += ` AND actividad.de_actividad ILIKE $${pCount}`;
+      countPS += ` AND actividad.de_actividad ILIKE $${pCount}`;
+      paramsArr.push(filter);
+      pCount++;
+    }
+    if (req.id_ganado) {
+      searchPS += ` AND ganado.id_ganado = $${pCount}`;
+      countPS += ` AND ganado.id_ganado= $${pCount}`;
+      paramsArr.push(req.id_ganado);
+      pCount++;
+    }
+    if (req.query.dateFrom) {
+      searchPS += ` AND actividad.fe_actividad >= $${pCount}`;
+      countPS += ` AND actividad.fe_actividad >= $${pCount}`;
+      paramsArr.push(req.query.dateFrom);
+      pCount++;
+    }
+    if (req.query.dateTo) {
+      searchPS += ` AND actividad.fe_actividad <= $${pCount}`;
+      countPS += ` AND actividad.fe_actividad <= $${pCount}`;
+      paramsArr.push(req.query.dateTo);
+      pCount++;
+    }
+    searchPS += ` OFFSET $${pCount} LIMIT $${pCount + 1}`;
+    db.task(async con => {
+      try {
+        let totalItems = await con.one(countPS, paramsArr);
+        totalItems = totalItems.count;
+        const rs = await con.any(searchPS, [...paramsArr, offset, ITEMS_PER_PAGE]);
+        res.status(200).json({
+          rs,
+          currentPage: page,
+          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+          hasPreviousPage: page > 1,
+          nextPage: page + 1,
+          previousPage: page - 1,
+          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+          totalItems
+        });
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getTratamientos = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      13,
+      'No se tienen permisos para manipular el modulo de otras actividades'
+    );
+    const page = +req.query.page || 1;
+    const offset = (page - 1) * ITEMS_PER_PAGE;
+    let countPS =
+      'SELECT COUNT(id_actividad) FROM( ' +
+      'SELECT COUNT(ganado.id_ganado) nu_ganado, actividad.* FROM  actividad  ' +
+      'INNER JOIN actividad_ganado USING(id_actividad) ' +
+      'INNER JOIN ganado USING(id_ganado) ' +
+      'WHERE id_empresa = $1 AND id_tipo_actividad =5 ';
+    let searchPS =
+      'SELECT COUNT(ganado.id_ganado) nu_ganado, actividad.* FROM  actividad  ' +
+      'INNER JOIN actividad_ganado USING(id_actividad) ' +
+      'INNER JOIN ganado USING(id_ganado) WHERE id_empresa = $1 ' +
+      'AND id_tipo_actividad =5 ';
+    let pCount = 2;
+    const paramsArr = [id_empresa];
+    if (req.query.filter) {
+      const filter = `%${req.query.filter}%`;
+      searchPS += ` AND actividad.de_actividad ILIKE $${pCount}`;
+      countPS += ` AND actividad.de_actividad ILIKE $${pCount}`;
+      paramsArr.push(filter);
+      pCount++;
+    }
+    if (req.id_ganado) {
+      searchPS += ` AND ganado.id_ganado = $${pCount}`;
+      countPS += ` AND ganado.id_ganado= $${pCount}`;
+      paramsArr.push(req.id_ganado);
+      pCount++;
+    }
+    if (req.query.dateFrom) {
+      searchPS += ` AND actividad.fe_actividad >= $${pCount}`;
+      countPS += ` AND actividad.fe_actividad >= $${pCount}`;
+      paramsArr.push(req.query.dateFrom);
+      pCount++;
+    }
+    if (req.query.dateTo) {
+      searchPS += ` AND actividad.fe_actividad <= $${pCount}`;
+      countPS += ` AND actividad.fe_actividad <= $${pCount}`;
+      paramsArr.push(req.query.dateTo);
+      pCount++;
+    }
+    searchPS += 'GROUP BY id_actividad';
+    searchPS += ` OFFSET $${pCount} LIMIT $${pCount + 1}`;
+    countPS += 'GROUP BY id_actividad ) rs';
+    db.task(async con => {
+      try {
+        let totalItems = await con.one(countPS, paramsArr);
+        totalItems = totalItems.count;
+        const rs = await con.any(searchPS, [...paramsArr, offset, ITEMS_PER_PAGE]);
+        res.status(200).json({
+          rs,
+          currentPage: page,
+          hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+          hasPreviousPage: page > 1,
+          nextPage: page + 1,
+          previousPage: page - 1,
+          lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+          totalItems
+        });
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getTratamiento = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      13,
+      'No se tienen permisos para manipular el modulo de otras actividades'
+    );
+    const id_actividad = req.params.idActividad;
+    const tratamiento = await db.many(actividadQueries.getTratamiento, [id_actividad, id_empresa]);
+    res.status(200).json({ tratamiento });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.createServicio = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      14,
+      'No se tienen permisos para manipular el modulo servicios'
+    );
+    const fe_actividad = req.body.feActividad;
+    const de_actividad = req.body.deActividad;
+    const id_tipo_actividad = req.body.idTipoActividad;
+    const id_vaca = req.id_vaca;
+    db.task(async con => {
+      try {
+        const actividad = await con.one(actividadQueries.createActividad, [
+          id_tipo_actividad,
+          de_actividad,
+          fe_actividad
+        ]);
+        if (+id_tipo_actividad === 6) {
+          await con.none(actividadQueries.servicioActividadGanado, [
+            actividad.id_actividad,
+            id_vaca,
+            req.id_toro
+          ]);
+          res.status(201).json({ actividad, co_vaca: req.body.coVaca, co_toro: req.body.co_toro });
+        } else {
+          await con.none(actividadQueries.servicioActividadPajuela, [
+            actividad.id_actividad,
+            req.id_pajuela,
+            id_vaca
+          ]);
+          res
+            .status(201)
+            .json({ actividad, co_vaca: req.body.coVaca, co_pajuela: req.body.coPajuela });
+        }
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.updateServicio = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.body.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      14,
+      'No se tienen permisos para manipular el modulo servicios'
+    );
+    const id_actividad = req.body.idActividad;
+    const fe_actividad = req.body.feActividad;
+    const de_actividad = req.body.deActividad;
+    const id_vaca = req.id_vaca;
+    db.task(async con => {
+      try {
+        const updatedActividad = await con.one(actividadQueries.updateActividadOtros, [
+          de_actividad,
+          fe_actividad,
+          id_actividad
+        ]);
+        if (updatedActividad.id_tipo_actividad === 6) {
+          await con.none(actividadQueries.deleteOldAGTratamiento, [updatedActividad.id_actividad]);
+          await con.none(actividadQueries.servicioActividadGanado, [
+            updatedActividad.id_actividad,
+            id_vaca,
+            req.id_toro
+          ]);
+          res.status(200).json({
+            updatedActividad,
+            co_vaca: req.body.coVaca,
+            co_toro: req.body.co_toro,
+            msg: 'servicio actualizado'
+          });
+        } else {
+          await con.none(actividadQueries.deleteServicioAP, [updatedActividad.id_actividad]);
+          await con.none(actividadQueries.servicioActividadPajuela, [
+            updatedActividad.id_actividad,
+            req.id_pajuela,
+            id_vaca
+          ]);
+          res.status(200).json({
+            updatedActividad,
+            co_vaca: req.body.coVaca,
+            co_pajuela: req.body.coPajuela,
+            msg: 'servicio pajuela actualizado'
+          });
+        }
+      } catch (err) {
+        errorHandler(err, next);
+      }
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getServicio = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      14,
+      'No se tienen permisos para manipular el modulo servicios'
+    );
+    const actividad = req.actividad;
+    let servicio;
+    if (actividad.id_tipo_actividad === 6) {
+      servicio = await db.many(actividadQueries.getServicioGanado, [
+        actividad.id_actividad,
+        id_empresa
+      ]);
+    } else {
+      servicio = await db.many(actividadQueries.getServicioPajuela, [
+        actividad.id_actividad,
+        id_empresa
+      ]);
+    }
+    res.status(200).json({ servicio });
   } catch (err) {
     errorHandler(err, next);
   }

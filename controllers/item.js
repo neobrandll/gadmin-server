@@ -83,8 +83,8 @@ exports.getItems = async (req, res, next) => {
     await permissionHandler(
       id_empresa,
       id_usuario,
-      9,
-      'No se tienen permisos para manipular el modulo de pajuela'
+      10,
+      'No se tienen permisos para manipular el modulo de Item'
     );
     const page = +req.query.page || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;

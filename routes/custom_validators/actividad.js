@@ -125,3 +125,239 @@ exports.partoExist = async (idActividad, { req }) => {
   }
   return true;
 };
+
+exports.ganadoArr = async (ganadoArr, { req }) => {
+  const id_empresa = req.body.idEmpresa;
+  if (!Array.isArray(ganadoArr)) {
+    throw new Error('El valor ingresado no es un Array');
+  }
+  if (!ganadoArr.length > 0) {
+    throw new Error('No se introdujo ningun codigo de ganado');
+  }
+  if (ganadoArr.length > 1 && +req.body.idTipoActividad === 3) {
+    throw new Error('El tipo de actividad requiere de un solo codigo de ganado');
+  }
+  if (+req.body.idTipoActividad === 3) {
+    const ganadoFound = await db.oneOrNone(actividadQueries.vacaExists, [ganadoArr[0], id_empresa]);
+    if (!ganadoFound) {
+      throw new Error('No existe ninguna vaca con el codigo ingresado en la empresa');
+    }
+    req.id_ganado = ganadoFound.id_ganado;
+    return true;
+  }
+  if (+req.body.idTipoActividad === 5) {
+    req.idGanadoArr = [];
+    let ganadoFound = null;
+    await db.task(async con => {
+      for (const coGanado of ganadoArr) {
+        ganadoFound = await con.oneOrNone(ganadoQueries.codigoExist, [coGanado, id_empresa]);
+        if (!ganadoFound) {
+          throw new Error('Uno o mas de los codigos de ganado ingresado no existen en la empresa');
+        }
+        req.idGanadoArr.push(ganadoFound.id_ganado);
+      }
+    });
+    return true;
+  } else {
+    throw new Error('por favor revisar el tipo de actividad');
+  }
+};
+
+exports.updateOtrosIdGanadoArr = async (ganadoArr, { req }) => {
+  const id_empresa = req.body.idEmpresa;
+  if (!Array.isArray(ganadoArr)) {
+    throw new Error('El valor ingresado no es un Array');
+  }
+  if (!ganadoArr.length > 0) {
+    throw new Error('No se introdujo ningun codigo de ganado');
+  }
+  if (ganadoArr.length > 1 && req.actividad.id_tipo_actividad === 3) {
+    throw new Error('El tipo de actividad requiere de un solo codigo de ganado');
+  }
+  if (req.actividad.id_tipo_actividad === 3) {
+    const ganadoFound = await db.oneOrNone(actividadQueries.vacaExists, [ganadoArr[0], id_empresa]);
+    if (!ganadoFound) {
+      throw new Error('No existe ninguna vaca con el codigo ingresado en la empresa');
+    }
+    req.id_ganado = ganadoFound.id_ganado;
+    return true;
+  }
+  if (req.actividad.id_tipo_actividad === 5) {
+    req.idGanadoArr = [];
+    let ganadoFound = null;
+    await db.task(async con => {
+      for (const coGanado of ganadoArr) {
+        ganadoFound = await con.oneOrNone(ganadoQueries.codigoExist, [coGanado, id_empresa]);
+        if (!ganadoFound) {
+          throw new Error('Uno o mas de los codigos de ganado ingresado no existen en la empresa');
+        }
+        req.idGanadoArr.push(ganadoFound.id_ganado);
+      }
+    });
+    return true;
+  } else {
+    throw new Error('por favor revisar el tipo de actividad');
+  }
+};
+
+exports.updateOtrosIdActividad = async (idActividad, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const actividadFound = await db.oneOrNone(actividadQueries.idActividadOtrosExists, [
+    idActividad,
+    id_empresa
+  ]);
+  if (!actividadFound) {
+    throw new Error('no existe ningun aborto o tratamiento con el id ingresado en la empresa');
+  }
+  req.actividad = actividadFound;
+  return true;
+};
+
+exports.vacaExists = async (coGanado, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const ganadoFound = await db.oneOrNone(actividadQueries.vacaExists, [coGanado, id_empresa]);
+  if (!ganadoFound) {
+    throw new Error('No existe ninguna vaca con el codigo ingresado en la empresa');
+  }
+  req.id_ganado = ganadoFound.id_ganado;
+  return true;
+};
+
+exports.tratamientoExists = async (idActividad, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const actividadFound = await db.oneOrNone(actividadQueries.tratamientoExists, [
+    id_empresa,
+    idActividad
+  ]);
+  if (!actividadFound) {
+    throw new Error('No existe ningun tratamiento con el id ingresado en la empresa');
+  }
+  return true;
+};
+
+exports.tipoActividadServicio = async (idTipoActividad, { req }) => {
+  if (+idTipoActividad === 6) {
+    if (!req.body.coToro) {
+      throw new Error(
+        'El tipo de actividad es servicio natural y no se introdujo el codigo del toro'
+      );
+    }
+    if (req.body.coPajuela) {
+      throw new Error(
+        'El tipo de actividad es servicio natural y se introdujo el codigo de una pajuela'
+      );
+    }
+  }
+  if (+idTipoActividad === 7) {
+    if (!req.body.coPajuela) {
+      throw new Error(
+        'El tipo de actividad es servicio con pajuela y no se introdujo el codigo de la pajuela'
+      );
+    }
+    if (req.body.coToro) {
+      throw new Error(
+        'El tipo de actividad es servicio con pajuela y se introdujo el codigo de un toro'
+      );
+    }
+  }
+  if (+idTipoActividad !== 6 && +idTipoActividad !== 7) {
+    throw new Error('el id del tipo de actividad es incorrecto');
+  }
+  return true;
+};
+
+exports.validateCoPajuelaServicio = async (codigo, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const pajuelaFound = await db.oneOrNone(ganadoQueries.pajuelaExist, [codigo, id_empresa]);
+  if (!pajuelaFound) {
+    throw new Error('no existe ninguna pajuela con el codigo ingresado en la empresa');
+  }
+  req.id_pajuela = pajuelaFound.id_pajuela;
+  return true;
+};
+
+exports.validateCoVacaServicio = async (coGanado, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const ganadoFound = await db.oneOrNone(actividadQueries.vacaExists, [coGanado, id_empresa]);
+  if (!ganadoFound) {
+    throw new Error('No existe ninguna vaca con el codigo ingresado en la empresa');
+  }
+  req.id_vaca = ganadoFound.id_ganado;
+  return true;
+};
+
+exports.validateCoToroServicio = async (coGanado, { req }) => {
+  let id_empresa = req.body.idEmpresa;
+  if (!id_empresa) {
+    id_empresa = req.params.idEmpresa;
+  }
+  const ganadoFound = await db.oneOrNone(actividadQueries.toroExists, [coGanado, id_empresa]);
+  if (!ganadoFound) {
+    throw new Error('No existe ningun toro con el codigo ingresado en la empresa');
+  }
+  req.id_toro = ganadoFound.id_ganado;
+  return true;
+};
+
+exports.validateIdServicioUpdate = async (idActividad, { req }) => {
+  const id_empresa = req.body.idEmpresa;
+  const servicioFound = await db.oneOrNone(actividadQueries.servicioExists, [
+    idActividad,
+    id_empresa
+  ]);
+  if (!servicioFound) {
+    throw new Error('No existe ningun servicio con el id ingresado en la empresa');
+  }
+  if (servicioFound.id_tipo_actividad === 6) {
+    if (!req.body.coToro) {
+      throw new Error(
+        'El tipo de actividad es servicio natural y no se introdujo el codigo del toro'
+      );
+    }
+    if (req.body.coPajuela) {
+      throw new Error(
+        'El tipo de actividad es servicio natural y se introdujo el codigo de una pajuela'
+      );
+    }
+  } else {
+    if (!req.body.coPajuela) {
+      throw new Error(
+        'El tipo de actividad es servicio con pajuela y no se introdujo el codigo de la pajuela'
+      );
+    }
+    if (req.body.coToro) {
+      throw new Error(
+        'El tipo de actividad es servicio con pajuela y se introdujo el codigo de un toro'
+      );
+    }
+  }
+  return true;
+};
+
+exports.servicioExists = async (idActividad, { req }) => {
+  const id_empresa = req.params.idEmpresa;
+  const servicioFound = await db.oneOrNone(actividadQueries.servicioExists, [
+    idActividad,
+    id_empresa
+  ]);
+  if (!servicioFound) {
+    throw new Error('No existe ningun servicio con el id ingresado en la empresa');
+  }
+  req.actividad = servicioFound;
+  return true;
+};

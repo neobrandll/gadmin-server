@@ -7,22 +7,6 @@ const permissionHandler = require('../util/permissionHandler');
 
 const ITEMS_PER_PAGE = 20;
 
-exports.PLANTILLA = async (req, res, next) => {
-  try {
-    await validationHandler(req);
-    const id_usuario = req.id_usuario;
-    const id_empresa = req.body.idEmpresa;
-    await permissionHandler(
-      id_empresa,
-      id_usuario,
-      8,
-      'No se tienen permisos para manipular el modulo de potrero'
-    );
-  } catch (err) {
-    errorHandler(err, next);
-  }
-};
-
 exports.createPajuela = async (req, res, next) => {
   try {
     await validationHandler(req);
