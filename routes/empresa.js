@@ -21,7 +21,7 @@ router.get(
 );
 
 router.post(
-  '/createEmpresa',
+  '',
   isAuth,
   [
     body('pais')

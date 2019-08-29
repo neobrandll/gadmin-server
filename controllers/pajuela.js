@@ -5,7 +5,7 @@ const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 1000;
 
 exports.createPajuela = async (req, res, next) => {
   try {

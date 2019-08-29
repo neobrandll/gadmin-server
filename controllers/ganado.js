@@ -8,7 +8,7 @@ const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
 //PARA LOS GET DEL GANADO
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 1000;
 
 exports.getRazas = async (req, res, next) => {
   try {

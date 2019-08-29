@@ -5,7 +5,7 @@ const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 1000;
 
 exports.createProduccion = async (req, res, next) => {
   try {

@@ -8,7 +8,7 @@ const errorHandler = require('../util/error');
 const validationHandler = require('../util/validationHandler');
 const permissionHandler = require('../util/permissionHandler');
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 1000;
 
 exports.createParto = async (req, res, next) => {
   try {
