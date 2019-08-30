@@ -3,11 +3,16 @@ const PS = require('pg-promise').PreparedStatement;
 module.exports = {
   getProfiles: new PS(
     'getProfiles',
-    'SELECT id_perfil, de_perfil, id_empresa, de_permiso, id_permiso ' +
+    'SELECT id_perfil, de_perfil, empresa.id_empresa, no_empresa,de_permiso, id_permiso ' +
       'FROM perfil_usuario INNER JOIN perfil ' +
       'USING(id_perfil) INNER JOIN permiso_perfil USING(id_perfil) INNER JOIN permiso USING(id_permiso)' +
-      'WHERE id_usuario = $1 AND id_empresa = $2'
+      ' INNER JOIN empresa USING(id_empresa) WHERE perfil_usuario.id_usuario = $1 AND empresa.id_empresa = $2'
   ),
+  getDistincProfiles: new PS('getDistincProfiles', 'SELECT perfil.id_perfil, perfil.de_perfil'
+  + ' FROM perfil_usuario INNER JOIN perfil  USING(id_perfil) INNER JOIN permiso_perfil USING(id_perfil)'
+  +' INNER JOIN permiso USING(id_permiso) INNER JOIN empresa USING(id_empresa)'  
+  + ' WHERE perfil_usuario.id_usuario = $1 AND empresa.id_empresa = $2 GROUP BY perfil.id_perfil'),
+  
   createEmpresa: new PS(
     'createEmpresa',
     'INSERT INTO empresa (id_usuario, id_direccion, no_empresa, ri_empresa) ' +

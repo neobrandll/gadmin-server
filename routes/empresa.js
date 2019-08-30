@@ -9,7 +9,7 @@ const isAuth = require('../middlewares/is-auth');
 const router = express.Router();
 
 router.get(
-  '/getProfiles/:id_empresa',
+  '/profiles/:id_empresa',
   isAuth,
   [
     param('id_empresa', 'No se envio el id de la empresa.')

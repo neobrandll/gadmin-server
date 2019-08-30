@@ -37,8 +37,8 @@ module.exports = {
   getEmpresas: new PS(
     'getEmpresas',
     'SELECT id_empresa, no_empresa, ri_empresa ' +
-      'FROM empresa where id_empresa IN (SELECT DISTINCT (id_empresa) ' +
-      'FROM perfil_usuario WHERE id_usuario = $1)'
+    'FROM empresa where id_empresa IN (SELECT DISTINCT (id_empresa) '+
+    'FROM perfil_usuario INNER JOIN perfil USING(id_perfil) WHERE id_usuario = $1)'
   ),
   updateAddress: new PS(
     'updateAddress',

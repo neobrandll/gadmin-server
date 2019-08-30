@@ -38,7 +38,7 @@ router.post(
 );
 
 router.get(
-  '/getRazas/:idEmpresa',
+  '/razas/:idEmpresa',
   isAuth,
   [
     param('idEmpresa')

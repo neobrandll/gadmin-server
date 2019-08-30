@@ -12,6 +12,7 @@ exports.getProfiles = async (req, res, next) => {
     await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.id_empresa;
+     const distintosPerfiles = await db.manyOrNone(empresaQueries.getDistincProfiles, [id_usuario, id_empresa])
     const perfiles = await db.manyOrNone(empresaQueries.getProfiles, [id_usuario, id_empresa]);
     if (!perfiles.length > 0) {
       const err = new Error('El usuario no posee perfiles en la empresa seleccionada');
@@ -22,7 +23,7 @@ exports.getProfiles = async (req, res, next) => {
     for (const perfil of perfiles) {
       permisos.push(perfil.id_permiso);
     }
-    res.status(200).json({ perfiles, permisos });
+    res.status(200).json({ perfilesDetallados: perfiles, permisos, distintosPerfiles });
   } catch (err) {
     errorHandler(err, next);
   }
