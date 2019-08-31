@@ -16,7 +16,7 @@ const upload = require('../util/fileUpload');
 const router = express.Router();
 
 router.post(
-  '/createRaza',
+  '/raza',
   isAuth,
   [
     body('idEmpresa')
@@ -51,6 +51,30 @@ router.get(
       .custom(empresaValidators.empresaExist)
   ],
   ganadoControllers.getRazas
+);
+
+router.get(
+  '/raza/:idEmpresa/:idRaza',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+      param('idRaza')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la raza')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(ganadoValidators.razaExist)
+  ],
+  ganadoControllers.getRaza
 );
 
 router.put(

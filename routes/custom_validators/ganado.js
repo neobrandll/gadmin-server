@@ -22,6 +22,8 @@ exports.razaExist = async (id_raza, { req }) => {
   const razaFound = await db.oneOrNone(ganadoQueries.razaExist, [id_raza, id_empresa]);
   if (!razaFound) {
     throw new Error('no existe ninguna raza con el id ingresado en la empresa seleccionada');
+  }else{
+    req.raza = razaFound
   }
   return true;
 };

@@ -32,6 +32,25 @@ exports.getRazas = async (req, res, next) => {
   }
 };
 
+exports.getRaza = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      6,
+      'No se tienen permisos para manejar ganado y/o razas'
+    );
+  
+    const raza = req.raza;
+    res.status(200).json({ ...raza });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
 exports.createRaza = async (req, res, next) => {
   try {
     await validationHandler(req);
@@ -221,13 +240,13 @@ exports.searchGanado = async (req, res, next) => {
     );
     const page = +req.query.page || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;
-    let countPS = 'SELECT COUNT(id_ganado) FROM ganado WHERE id_empresa = $1';
-    let searchPS = 'SELECT id_ganado, co_ganado, fo_ganado FROM ganado WHERE id_empresa = $1';
+    let countPS = 'SELECT COUNT(id_ganado) FROM ganado WHERE ganado.id_empresa = $1';
+    let searchPS = 'SELECT id_ganado, fe_ganado, co_ganado, fo_ganado, de_raza ,de_estado_ganado, de_tipo_ganado FROM ganado INNER JOIN tipo_ganado USING(id_tipo_ganado) INNER JOIN raza USING(id_raza) INNER JOIN estado_ganado USING(id_estado_ganado) WHERE ganado.id_empresa = $1';
     let pCount = 2;
     const paramsArr = [id_empresa];
     if (req.query.idRaza) {
-      searchPS += ` AND id_raza = $${pCount}`;
-      countPS += ` AND id_raza = $${pCount}`;
+      searchPS += ` AND ganado.id_raza = $${pCount}`;
+      countPS += ` AND ganado.id_raza = $${pCount}`;
       paramsArr.push(req.query.idRaza);
       pCount++;
     }
