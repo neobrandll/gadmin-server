@@ -42,9 +42,14 @@ module.exports = {
   ),
   getGanado: new PS(
     'getGanado',
-    'SELECT ganado.*, de_raza FROM ganado ' +
-      'INNER JOIN raza USING(id_raza) WHERE co_ganado = $1 ' +
-      'AND ganado.id_empresa = $2'
+    'SELECT ganado.*, de_raza, madre.co_ganado madre_codigo, padre.co_ganado padre_codigo, ' +
+      'pajuela.co_pajuela pajuela_padre_codigo ' +
+      'FROM ganado  ' +
+      'LEFT JOIN ganado madre on ganado.id_ma_ganado = madre.id_ganado ' +
+      'LEFT JOIN ganado padre on ganado.id_pa_ganado = padre.id_ganado ' +
+      'LEFT JOIN pajuela on ganado.id_pa_pajuela = pajuela.id_pajuela ' +
+      'INNER JOIN raza on ganado.id_raza = raza.id_raza  ' +
+      'WHERE ganado.co_ganado = $1 AND ganado.id_empresa = $2'
   ),
   getLotesOfGanado: new PS(
     'getLotesOfGanado',

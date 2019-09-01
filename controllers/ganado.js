@@ -43,7 +43,7 @@ exports.getRaza = async (req, res, next) => {
       6,
       'No se tienen permisos para manejar ganado y/o razas'
     );
-  
+
     const raza = req.raza;
     res.status(200).json({ ...raza });
   } catch (err) {
@@ -188,7 +188,7 @@ exports.updateGanado = async (req, res, next) => {
       co_ganado,
       id_empresa
     ]);
-    if (req.file) {
+    if (req.file && req.fo_ganado) {
       //aqui elimino la foto anterior del ganado, esto solamente si se actualizo
       fs.unlinkSync(req.fo_ganado);
     }
@@ -217,7 +217,7 @@ exports.getGanado = async (req, res, next) => {
       try {
         const ganado = await db.one(ganadoQueries.getGanado, [co_ganado, id_empresa]);
         ganado.lotes = await db.any(ganadoQueries.getLotesOfGanado, [ganado.id_ganado]);
-        res.status(200).json({ ganado });
+        res.status(200).json({ ...ganado });
       } catch (err) {
         errorHandler(err, next);
       }
@@ -241,7 +241,8 @@ exports.searchGanado = async (req, res, next) => {
     const page = +req.query.page || 1;
     const offset = (page - 1) * ITEMS_PER_PAGE;
     let countPS = 'SELECT COUNT(id_ganado) FROM ganado WHERE ganado.id_empresa = $1';
-    let searchPS = 'SELECT id_ganado, fe_ganado, co_ganado, fo_ganado, de_raza ,de_estado_ganado, de_tipo_ganado FROM ganado INNER JOIN tipo_ganado USING(id_tipo_ganado) INNER JOIN raza USING(id_raza) INNER JOIN estado_ganado USING(id_estado_ganado) WHERE ganado.id_empresa = $1';
+    let searchPS =
+      'SELECT id_ganado, fe_ganado, co_ganado, fo_ganado, de_raza ,de_estado_ganado, de_tipo_ganado FROM ganado INNER JOIN tipo_ganado USING(id_tipo_ganado) INNER JOIN raza USING(id_raza) INNER JOIN estado_ganado USING(id_estado_ganado) WHERE ganado.id_empresa = $1';
     let pCount = 2;
     const paramsArr = [id_empresa];
     if (req.query.idRaza) {

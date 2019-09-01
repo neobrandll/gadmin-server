@@ -65,7 +65,7 @@ router.get(
       .isInt()
       .withMessage('El id debe de ser un numero entero')
       .custom(empresaValidators.empresaExist),
-      param('idRaza')
+    param('idRaza')
       .trim()
       .not()
       .isEmpty()
