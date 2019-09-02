@@ -203,7 +203,7 @@ exports.updateGanado = async (req, res, next) => {
 
 exports.getGanado = async (req, res, next) => {
   try {
-    validationHandler(req);
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.params.idEmpresa;
     await permissionHandler(

@@ -76,6 +76,25 @@ exports.updatePajuela = async (req, res, next) => {
   }
 };
 
+exports.getPajuela = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      9,
+      'No se tienen permisos para manipular el modulo de pajuela'
+    );
+    const co_pajuela = req.params.coPajuela;
+    const pajuela = await db.one(pajuelaQueries.getPajuela, [co_pajuela, id_empresa]);
+    res.status(200).json({ ...pajuela });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
 exports.getPajuelas = async (req, res, next) => {
   try {
     await validationHandler(req);

@@ -99,7 +99,7 @@ router.put(
 );
 
 router.get(
-  '/:idEmpresa',
+  '/search/:idEmpresa',
   isAuth,
   [
     param('idEmpresa')
@@ -124,6 +124,30 @@ router.get(
       .custom(ganadoValidators.razaExist)
   ],
   pajuelaControllers.getPajuelas
+);
+
+router.get(
+  '/:idEmpresa/:coPajuela',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('coPajuela')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el codigo de la pajuela')
+      .isInt()
+      .withMessage('El codigo debe de ser un numero entero')
+      .custom(pajuelaValidators.coPajuelaExist)
+  ],
+  pajuelaControllers.getPajuela
 );
 
 module.exports = router;

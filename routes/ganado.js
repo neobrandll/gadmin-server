@@ -166,7 +166,7 @@ router.get(
       .isInt()
       .withMessage('El id debe de ser un numero entero')
       .custom(empresaValidators.empresaExist),
-    body('coGanado')
+    param('coGanado')
       .trim()
       .not()
       .isEmpty()
@@ -257,7 +257,7 @@ router.put(
       .withMessage('Por favor ingrese el codigo del ganado')
       .isInt()
       .withMessage('El codigo debe de ser un numero entero')
-      .custom(ganadoValidators.coGanadoExist),
+     .custom(ganadoValidators.coGanadoExist),
     body('newCoGanado')
       .trim()
       .not()

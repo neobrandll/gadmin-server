@@ -67,10 +67,10 @@ exports.removeProfileFromUser = async (req, res, next) => {
 
 exports.createProfile = async (req, res, next) => {
   try {
+    await validationHandler(req);
     const id_usuario = req.id_usuario;
     const id_empresa = req.body.idEmpresa;
     const de_perfil = req.body.dePerfil.toLowerCase();
-    await validationHandler(req);
     await permissionHandler(
       id_empresa,
       id_usuario,
