@@ -340,7 +340,7 @@ router.get(
 );
 
 router.get(
-  '/:idEmpresa/:producto',
+  '/search/:idEmpresa/:producto',
   isAuth,
   [
     param('idEmpresa')
@@ -376,5 +376,29 @@ router.get(
       .withMessage('valor invalido')
   ],
   produccionControllers.getProduccion
+);
+
+router.get(
+  '/:idEmpresa/:idProduccion',
+  isAuth,
+  [
+    param('idEmpresa')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la empresa')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(empresaValidators.empresaExist),
+    param('idProduccion')
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage('Por favor ingrese el id de la produccion')
+      .isInt()
+      .withMessage('El id debe de ser un numero entero')
+      .custom(produccionValidators.produccionExist)
+  ],
+  produccionControllers.getIndividualProduccion
 );
 module.exports = router;

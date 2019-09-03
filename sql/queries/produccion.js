@@ -12,7 +12,8 @@ module.exports = {
   ),
   produccionExist: new PS(
     'produccionExist',
-    'SELECT * FROM produccion WHERE id_produccion = $1 AND id_empresa = $2'
+    'SELECT produccion.*, de_tipo_produccion FROM produccion ' +
+      'INNER JOIN tipo_produccion USING(id_tipo_produccion) WHERE produccion.id_produccion = $1 AND id_empresa = $2'
   ),
   pesajeExist: new PS(
     'pesajeExist',

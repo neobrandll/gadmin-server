@@ -10,7 +10,7 @@ const router = express.Router();
 router.post(
   '/registro',
   [
-    body('email', 'Porfavor ingrese un correo valido..')
+    body('email', 'Porfavor ingrese un correo valido')
       .trim()
       .not()
       .isEmpty()
@@ -81,7 +81,7 @@ router.post(
 router.post(
   '/login',
   [
-    body('password', 'Introduzca una contraseña correcta.')
+    body('password', 'Introduzca una contraseña correcta')
       .trim()
       .isLength({ min: 5 })
   ],
@@ -157,7 +157,7 @@ router.put(
   '/updateEmail',
   isAuth,
   [
-    body('email', 'Por favor ingrese un correo valido.')
+    body('email', 'Por favor ingrese un correo valido')
       .trim()
       .isEmail()
       .normalizeEmail()
@@ -177,7 +177,7 @@ router.put(
 router.post(
   '/sendTokenPassword',
   [
-    body('email', 'Por favor ingrese un correo valido.')
+    body('email', 'Por favor ingrese un correo valido')
       .trim()
       .isEmail()
       .normalizeEmail()
@@ -190,7 +190,7 @@ router.post(
 router.put(
   '/updatePassword',
   [
-    body('email', 'Por favor ingrese un correo valido.')
+    body('email', 'Por favor ingrese un correo valido')
       .trim()
       .isEmail()
       .normalizeEmail()

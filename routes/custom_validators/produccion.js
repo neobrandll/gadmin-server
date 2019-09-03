@@ -55,6 +55,7 @@ exports.produccionExist = async (idProduccion, { req }) => {
       throw new Error('id ingresado es de un pesaje no de una produccion de leche o queso');
     }
   }
+  req.produccion = produccionFound;
   return true;
 };
 

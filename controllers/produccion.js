@@ -64,7 +64,6 @@ exports.updateProduccion = async (req, res, next) => {
     const updatedProduccion = await db.one(produccionQueries.updateProduccion, [
       id_tipo_produccion,
       id_unidad,
-      id_empresa,
       fe_produccion,
       ca_produccion,
       id_produccion,
@@ -396,6 +395,24 @@ exports.getPesajeCount = async (req, res, next) => {
     res.status(200).json({
       rs
     });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+};
+
+exports.getIndividualProduccion = async (req, res, next) => {
+  try {
+    await validationHandler(req);
+    const id_usuario = req.id_usuario;
+    const id_empresa = req.params.idEmpresa;
+    await permissionHandler(
+      id_empresa,
+      id_usuario,
+      11,
+      'No se tienen permisos para manipular el modulo de Produccion'
+    );
+    const produccion = req.produccion;
+    res.status(200).json({ ...produccion });
   } catch (err) {
     errorHandler(err, next);
   }
