@@ -103,6 +103,7 @@ exports.createParto = async (req, res, next) => {
         }
         ag_query = ag_query.substring(0, ag_query.length - 1);
         await con.none(ag_query, ag_paramArr);
+        await con.none(actividadQueries.updateEstadoGanado, [madre.id_ganado, id_empresa]);
         res.status(201).json({ actividad, codigoCrias: coArr, msg: 'parto creado!' });
       } catch (err) {
         errorHandler(err, next);
@@ -271,7 +272,7 @@ exports.getPartos = async (req, res, next) => {
     let searchPS =
       'SELECT COUNT(cria.id_ganado) nu_crias, actividad.id_actividad, actividad.fe_actividad, actividad.de_actividad, ' +
       'madre.co_ganado co_ma_ganado, pajuela.co_pajuela co_pa_pajuela, padre.co_ganado co_pa_ganado, actividad.id_tipo_actividad ' +
-      ',actividad.de_actividad FROM ganado cria ' +
+      ' FROM ganado cria ' +
       'LEFT JOIN ganado padre ON cria.id_pa_ganado = padre.id_ganado ' +
       'LEFT JOIN ganado madre ON cria.id_ma_ganado = madre.id_ganado ' +
       'LEFT JOIN pajuela ON cria.id_pa_pajuela = pajuela.id_pajuela ' +
@@ -364,7 +365,7 @@ exports.getParto = async (req, res, next) => {
     );
     const id_actividad = req.params.idActividad;
     const parto = await db.many(actividadQueries.getParto, [id_empresa, id_actividad]);
-    res.status(200).json({ parto });
+    res.status(200).json({ crias: parto });
   } catch (err) {
     errorHandler(err, next);
   }
