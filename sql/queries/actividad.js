@@ -28,7 +28,7 @@ module.exports = {
   getParto: new PS(
     'getParto',
     'SELECT cria.co_ganado, cria.id_tipo_ganado , cria.pe_ganado,' +
-      ' padre.co_ganado co_pa_ganado, cria.id_pa_ganado, madre.co_ganado co_ma_ganado, cria.id_ma_ganado,' +
+      ' padre.co_ganado co_pa_ganado, cria.id_pa_ganado, madre.co_ganado co_ma_ganado, cria.id_ma_ganado, de_tipo_ganado,' +
       ' pajuela.co_pajuela co_pa_pajuela, cria.id_pa_pajuela, actividad.*, tipo_actividad.de_tipo_actividad FROM ganado cria  ' +
       'LEFT JOIN ganado padre ON cria.id_pa_ganado = padre.id_ganado  ' +
       'LEFT JOIN ganado madre ON cria.id_ma_ganado = madre.id_ganado ' +
@@ -36,6 +36,7 @@ module.exports = {
       'INNER JOIN actividad_ganado ON cria.id_ganado = actividad_ganado.id_ganado ' +
       'INNER JOIN actividad USING(id_actividad) ' +
       'INNER JOIN tipo_actividad USING(id_tipo_actividad) ' +
+      'INNER JOIN tipo_ganado ON cria.id_tipo_ganado = tipo_ganado.id_tipo_ganado ' +
       'WHERE cria.id_empresa = $1 AND id_actividad = $2'
   ),
   updateEstadoGanado: new PS(
